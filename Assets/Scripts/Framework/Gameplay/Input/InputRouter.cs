@@ -13,11 +13,15 @@ namespace Spotlight
         [SerializeField] private LayerMask interactableMask;
         [SerializeField] private LayerMask walkableMask;
         [SerializeField] private bool inputEnabled = true;
+        [SerializeField] private bool worldInputEnabled = true;
+        [SerializeField] private MonoBehaviour commandSinkSource;
 
         private readonly List<RaycastResult> uiHits = new List<RaycastResult>();
+        private IGameplayInputSink commandSink;
 
         public event Action<InputRouteResult> RouteResolved;
         public bool InputEnabled => inputEnabled;
+        public bool WorldInputEnabled => worldInputEnabled;
         public InputRouteResult LastRoute { get; private set; } = InputRouteResult.Ignored;
 
         public void Configure(Camera camera, InteractionController interactions,
@@ -36,6 +40,8 @@ namespace Spotlight
             {
                 RoutePointerDown(Input.mousePosition);
             }
+
+            RouteKeyboardCommands();
         }
 
         public void SetInputEnabled(bool enabled)
@@ -43,9 +49,27 @@ namespace Spotlight
             inputEnabled = enabled;
         }
 
+        public void SetWorldInputEnabled(bool enabled)
+        {
+            worldInputEnabled = enabled;
+        }
+
+        public void SetCommandSink(IGameplayInputSink sink)
+        {
+            commandSink = sink;
+            commandSinkSource = sink as MonoBehaviour;
+        }
+
+        public bool RouteCommand(GameplayInputCommand command)
+        {
+            ResolveCommandSink();
+            return inputEnabled && commandSink != null && commandSink.CanHandleInput &&
+                   commandSink.TryHandle(command);
+        }
+
         public InputRouteResult RoutePointerDown(Vector2 screenPosition)
         {
-            if (!inputEnabled)
+            if (!inputEnabled || !worldInputEnabled)
             {
                 return Resolve(InputRouteResult.Disabled);
             }
@@ -101,6 +125,37 @@ namespace Spotlight
             LastRoute = result;
             RouteResolved?.Invoke(result);
             return result;
+        }
+
+
+        private void ResolveCommandSink()
+        {
+            if (commandSink == null && commandSinkSource != null)
+            {
+                commandSink = commandSinkSource as IGameplayInputSink;
+            }
+        }
+
+        private void RouteKeyboardCommands()
+        {
+            if (!inputEnabled)
+            {
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) RouteCommand(GameplayInputCommand.MoveLeft);
+            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) RouteCommand(GameplayInputCommand.MoveRight);
+            if (Input.GetKeyDown(KeyCode.Alpha1)) RouteCommand(GameplayInputCommand.LaneFront);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) RouteCommand(GameplayInputCommand.LaneBack);
+            if (Input.GetKeyDown(KeyCode.R)) RouteCommand(GameplayInputCommand.Prone);
+            if (Input.GetKeyDown(KeyCode.T)) RouteCommand(GameplayInputCommand.OnTable);
+            if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) RouteCommand(GameplayInputCommand.Stand);
+            if (Input.GetKeyDown(KeyCode.F)) RouteCommand(GameplayInputCommand.UseWeapon1);
+            if (Input.GetKeyDown(KeyCode.G)) RouteCommand(GameplayInputCommand.UseWeapon2);
+            if (Input.GetKeyDown(KeyCode.H)) RouteCommand(GameplayInputCommand.UseWeapon3);
+            if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl)) RouteCommand(GameplayInputCommand.ToggleOverviewZoom);
+            if (Input.GetKeyDown(KeyCode.E)) RouteCommand(GameplayInputCommand.Escape);
+            if (Input.GetKeyDown(KeyCode.Return)) RouteCommand(GameplayInputCommand.StartOrRestart);
         }
     }
 }

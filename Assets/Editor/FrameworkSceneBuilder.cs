@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Spotlight;
+using Spotlight.Battle;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -19,6 +20,10 @@ namespace Spotlight.Editor
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
         private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
+        private const string BattleDataFolder = ModulesFolder + "/Battle/Data";
+        private const string PrototypeWeaponPath = BattleDataFolder + "/PrototypeWeapon.asset";
+        private const string PrototypeShotgunPath = BattleDataFolder + "/PrototypeShotgun.asset";
+        private const string PrototypeRiflePath = BattleDataFolder + "/PrototypeRifle.asset";
 
         private static readonly string[] DeferredFolders =
         {
@@ -41,12 +46,14 @@ namespace Spotlight.Editor
             {
                 EnsureFolder(folder);
             }
+            EnsureFolder(BattleDataFolder);
 
             int interactableLayer = EnsureLayer("Interactable");
             int walkableLayer = EnsureLayer("Walkable");
+            WeaponDefinition[] prototypeWeapons = CreateOrUpdatePrototypeWeapons();
 
             BuildBootstrapScene();
-            BuildGameplayScene(interactableLayer, walkableLayer);
+            BuildGameplayScene(interactableLayer, walkableLayer, prototypeWeapons);
             ConfigureBuildSettings();
 
             AssetDatabase.SaveAssets();
@@ -68,7 +75,8 @@ namespace Spotlight.Editor
             EditorSceneManager.SaveScene(scene, BootstrapPath);
         }
 
-        private static void BuildGameplayScene(int interactableLayer, int walkableLayer)
+        private static void BuildGameplayScene(int interactableLayer, int walkableLayer,
+            WeaponDefinition[] prototypeWeapons)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -107,6 +115,9 @@ namespace Spotlight.Editor
             cameraController.Configure(cameraObject.transform, -6f, 6f, 0.2f);
             cameraController.SetFollowTarget(playerObject.transform, mainCamera);
 
+            BuildBattleGreybox(gameplayRoot, systems, world, coordinator, inputRouter,
+                playerMovement, playerObject, mainCamera, prototypeWeapons);
+
             interactionController.Configure(playerObject.transform, coordinator);
             inputRouter.Configure(mainCamera, interactionController, playerMovement,
                 1 << interactableLayer, 1 << walkableLayer);
@@ -118,6 +129,101 @@ namespace Spotlight.Editor
             overlay.Configure(coordinator, inputRouter, playerMovement, cameraController, probe);
 
             EditorSceneManager.SaveScene(scene, GameplayPath);
+        }
+
+        private static void BuildBattleGreybox(GameObject gameplayRoot, GameObject systems, GameObject world,
+            GameplayCoordinator coordinator, InputRouter inputRouter, PlayerMovement playerMovement,
+            GameObject playerObject, Camera mainCamera, WeaponDefinition[] prototypeWeapons)
+        {
+            GameObject battleSystems = NewChild(systems, "BattleSystems");
+            BattleArena arena = battleSystems.AddComponent<BattleArena>();
+            arena.Configure(8, 1.6f, -5.6f, 0);
+
+            CombatHealth playerHealth = playerObject.AddComponent<CombatHealth>();
+            playerHealth.Configure(100f);
+            PlayerBattleController battlePlayer = playerObject.AddComponent<PlayerBattleController>();
+            battlePlayer.Configure(arena, playerHealth,
+                new BattlePosition(BattleLane.Corridor, 7));
+
+            GameObject battleVisualRoot = NewChild(world, "BattleEnvironment");
+            CreateBattleGrid(battleVisualRoot.transform, arena);
+
+            GameObject coverAObject = CreateSpriteBox("Cover_Front_3", battleVisualRoot.transform,
+                arena.GetWorldPosition(new BattlePosition(BattleLane.Foreground, 3)),
+                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
+            CoverController coverA = coverAObject.AddComponent<CoverController>();
+            coverA.Configure(new BattlePosition(BattleLane.Foreground, 3), 1);
+
+            GameObject coverBObject = CreateSpriteBox("Cover_Back_5", battleVisualRoot.transform,
+                arena.GetWorldPosition(new BattlePosition(BattleLane.Background, 5)),
+                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
+            CoverController coverB = coverBObject.AddComponent<CoverController>();
+            coverB.Configure(new BattlePosition(BattleLane.Background, 5), 1);
+            GameObject coverCObject = CreateSpriteBox("Cover_Front_4", battleVisualRoot.transform,
+                arena.GetWorldPosition(new BattlePosition(BattleLane.Foreground, 4)),
+                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
+            CoverController coverC = coverCObject.AddComponent<CoverController>();
+            coverC.Configure(new BattlePosition(BattleLane.Foreground, 4), 1);
+            CoverController[] covers = { coverA, coverB, coverC };
+            arena.ConfigureTables(covers);
+
+            GameObject bossObject = CreateSpriteBox("PrototypeBoss", battleVisualRoot.transform,
+                arena.GetWorldPosition(new BattlePosition(BattleLane.Corridor, 4)),
+                new Vector2(1.2f, 1.8f), new Color(0.88f, 0.2f, 0.24f, 1f), 0, 15);
+            CombatHealth bossHealth = bossObject.AddComponent<CombatHealth>();
+            bossHealth.Configure(1200f);
+            BossEnergy bossEnergy = bossObject.AddComponent<BossEnergy>();
+            bossEnergy.Configure(200f, 15f, 0.2f);
+            BossMovement bossMovement = bossObject.AddComponent<BossMovement>();
+            bossMovement.Configure(arena, 4, 1.5f);
+            BossController boss = bossObject.AddComponent<BossController>();
+            boss.Configure(bossHealth, bossEnergy, bossMovement, battlePlayer, covers);
+            boss.ConfigureAttacks(3f, 1f, 15f, 30f);
+
+            WeaponController weapons = battleSystems.AddComponent<WeaponController>();
+            weapons.Configure(prototypeWeapons, battlePlayer, boss, arena);
+
+            BattleCameraRig cameraRig = battleSystems.AddComponent<BattleCameraRig>();
+            cameraRig.Configure(mainCamera, 5f, 6.2f);
+
+            BattleCoordinator battle = battleSystems.AddComponent<BattleCoordinator>();
+            battle.Configure(coordinator, inputRouter, playerMovement, battlePlayer, boss, weapons,
+                arena, covers, battleVisualRoot, cameraRig);
+
+            BattleCommandController commands = battleSystems.AddComponent<BattleCommandController>();
+            commands.Configure(battle, battlePlayer, weapons);
+            inputRouter.SetCommandSink(commands);
+
+            GameObject primaryWarning = CreateVisualBox("PrimaryAttackWarning", battleVisualRoot.transform,
+                Vector3.zero, new Vector2(1.45f, 1.15f), new Color(1f, 0.15f, 0.08f, 0.65f), 25);
+            GameObject secondaryWarning = CreateVisualBox("SecondaryAttackWarning", battleVisualRoot.transform,
+                Vector3.zero, new Vector2(1.45f, 1.15f), new Color(1f, 0.55f, 0.08f, 0.65f), 24);
+            BattleTelegraphView telegraphView = battleSystems.AddComponent<BattleTelegraphView>();
+            telegraphView.Configure(boss, arena, primaryWarning, secondaryWarning);
+
+            BattleDebugOverlay battleOverlay = battleSystems.AddComponent<BattleDebugOverlay>();
+            battleOverlay.Configure(battle, battlePlayer, boss, weapons);
+            battleVisualRoot.SetActive(false);
+        }
+
+        private static void CreateBattleGrid(Transform parent, BattleArena arena)
+        {
+            Color[] colors =
+            {
+                new Color(0.12f, 0.25f, 0.32f, 0.8f),
+                new Color(0.18f, 0.18f, 0.23f, 0.8f),
+                new Color(0.18f, 0.28f, 0.2f, 0.8f)
+            };
+
+            for (int lane = 0; lane < 3; lane++)
+            {
+                for (int column = 0; column < arena.ColumnCount; column++)
+                {
+                    BattlePosition position = new BattlePosition((BattleLane)lane, column);
+                    CreateVisualBox($"Cell_{position.Lane}_{column}", parent, arena.GetWorldPosition(position),
+                        new Vector2(1.45f, 1.15f), colors[lane], 0);
+                }
+            }
         }
 
         private static GameObject CreateSpriteBox(string name, Transform parent, Vector3 position,
@@ -140,6 +246,50 @@ namespace Spotlight.Editor
             collider.size = size;
             collider.isTrigger = true;
             return gameObject;
+        }
+
+        private static GameObject CreateVisualBox(string name, Transform parent, Vector3 position,
+            Vector2 size, Color color, int sortingOrder)
+        {
+            GameObject gameObject = new GameObject(name);
+            gameObject.transform.SetParent(parent);
+            gameObject.transform.position = position;
+
+            SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            renderer.drawMode = SpriteDrawMode.Sliced;
+            renderer.size = size;
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
+            return gameObject;
+        }
+
+        private static WeaponDefinition[] CreateOrUpdatePrototypeWeapons()
+        {
+            return new[]
+            {
+                CreateOrUpdateWeapon(PrototypeWeaponPath, "prototype_sidearm", "Prototype Sidearm",
+                    120f, 1.25f, 4),
+                CreateOrUpdateWeapon(PrototypeShotgunPath, "prototype_shotgun", "Prototype Shotgun",
+                    220f, 2.5f, 2),
+                CreateOrUpdateWeapon(PrototypeRiflePath, "prototype_rifle", "Prototype Rifle",
+                    80f, 0.65f, 6)
+            };
+        }
+
+        private static WeaponDefinition CreateOrUpdateWeapon(string path, string id, string displayName,
+            float damage, float cooldown, int range)
+        {
+            WeaponDefinition weapon = AssetDatabase.LoadAssetAtPath<WeaponDefinition>(path);
+            if (weapon == null)
+            {
+                weapon = ScriptableObject.CreateInstance<WeaponDefinition>();
+                AssetDatabase.CreateAsset(weapon, path);
+            }
+
+            weapon.Configure(id, displayName, damage, cooldown, range, DamageKind.Ranged);
+            EditorUtility.SetDirty(weapon);
+            return weapon;
         }
 
         private static void CreateEventSystem(Transform parent)

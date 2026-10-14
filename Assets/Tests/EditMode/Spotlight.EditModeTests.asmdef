@@ -3,6 +3,7 @@
   "rootNamespace": "Spotlight.Tests.EditMode",
   "references": [
     "Spotlight.Runtime",
+    "Spotlight.Battle",
     "nunit.framework"
   ],
   "includePlatforms": [

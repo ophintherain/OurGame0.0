@@ -3,6 +3,7 @@
   "rootNamespace": "Spotlight.Editor",
   "references": [
     "Spotlight.Runtime",
+    "Spotlight.Battle",
     "Unity.ugui"
   ],
   "includePlatforms": [

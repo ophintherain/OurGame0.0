@@ -1,5 +1,6 @@
 using System.Collections;
 using NUnit.Framework;
+using Spotlight.Battle;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -107,6 +108,46 @@ namespace Spotlight.Tests.PlayMode
             Assert.That(loader, Is.Not.Null);
             Assert.That(loader.IsLoading, Is.False);
             Object.Destroy(loaderObject);
+        }
+
+        [UnityTest]
+        public IEnumerator BattleGreybox_CanStartAndEscapeFromLeftCorridorEnd()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay", LoadSceneMode.Single);
+            yield return null;
+
+            BattleCoordinator battle = Object.FindObjectOfType<BattleCoordinator>();
+            PlayerBattleController player = Object.FindObjectOfType<PlayerBattleController>();
+            GameplayCoordinator phases = Object.FindObjectOfType<GameplayCoordinator>();
+            WeaponController weapons = Object.FindObjectOfType<WeaponController>();
+            InputRouter inputRouter = Object.FindObjectOfType<InputRouter>();
+            BattleCameraRig cameraRig = Object.FindObjectOfType<BattleCameraRig>();
+
+            Assert.That(battle, Is.Not.Null);
+            Assert.That(player, Is.Not.Null);
+            Assert.That(battle.TryBeginBattle(), Is.True);
+            Assert.That(phases.CurrentPhase, Is.EqualTo(GameplayPhase.Battling));
+            Assert.That(weapons.Loadout.Weapons, Has.Count.EqualTo(3));
+            Assert.That(inputRouter.WorldInputEnabled, Is.False);
+            Assert.That(inputRouter.RouteCommand(GameplayInputCommand.Prone), Is.True);
+            Assert.That(player.Posture, Is.EqualTo(PlayerPosture.Prone));
+            Assert.That(inputRouter.RouteCommand(GameplayInputCommand.Stand), Is.True);
+            Assert.That(inputRouter.RouteCommand(GameplayInputCommand.ToggleOverviewZoom), Is.True);
+            Assert.That(cameraRig.IsOverviewZoom, Is.True);
+            Assert.That(inputRouter.RouteCommand(GameplayInputCommand.ToggleOverviewZoom), Is.True);
+            Assert.That(cameraRig.IsOverviewZoom, Is.False);
+            Assert.That(inputRouter.RouteCommand(GameplayInputCommand.MoveLeft), Is.True);
+            Assert.That(player.Position.Column, Is.EqualTo(6));
+
+            for (int index = 0; index < 6; index++)
+            {
+                Assert.That(player.TryMoveHorizontal(-1), Is.True);
+            }
+
+            Assert.That(player.Position, Is.EqualTo(new BattlePosition(BattleLane.Corridor, 0)));
+            Assert.That(battle.TryEscape(), Is.True);
+            Assert.That(battle.LastResult.Outcome, Is.EqualTo(BattleOutcome.Escaped));
+            Assert.That(phases.CurrentPhase, Is.EqualTo(GameplayPhase.BattleResult));
         }
 
         private static GameObject CreateBootstrap(string name, bool autoStart)

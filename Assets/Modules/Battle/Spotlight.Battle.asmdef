@@ -1,0 +1,16 @@
+{
+  "name": "Spotlight.Battle",
+  "rootNamespace": "Spotlight.Battle",
+  "references": [
+    "Spotlight.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
