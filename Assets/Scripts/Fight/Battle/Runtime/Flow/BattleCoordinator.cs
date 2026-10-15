@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Spotlight.Battle
@@ -15,6 +16,7 @@ namespace Spotlight.Battle
         [SerializeField] private CoverController[] covers;
         [SerializeField] private GameObject battleVisualRoot;
         [SerializeField] private BattleCameraRig cameraRig;
+        [SerializeField] private bool autoStartOnScene;
 
         private bool subscribed;
 
@@ -162,6 +164,18 @@ namespace Spotlight.Battle
         public bool TryToggleOverviewZoom()
         {
             return IsBattleActive && cameraRig != null && cameraRig.ToggleOverviewZoom();
+        }
+
+        private IEnumerator Start()
+        {
+            if (!autoStartOnScene)
+            {
+                yield break;
+            }
+
+            // GameplayCoordinator enters Exploring in Start; begin the battle on the next frame.
+            yield return null;
+            TryBeginBattle();
         }
 
         private void OnEnable()

@@ -63,6 +63,27 @@ namespace Spotlight.Tests.EditMode
         }
 
         [Test]
+        public void PlayerMovement_HorizontalInputMovesAndStopsAtRelease()
+        {
+            GameObject gameObject = new GameObject("KeyboardMovementTest");
+            PlayerMovement movement = gameObject.AddComponent<PlayerMovement>();
+            movement.Configure(5f, -8f, 8f);
+
+            movement.SetHorizontalInput(1f);
+            movement.SimulateStep(0.2f);
+            Assert.That(gameObject.transform.position.x, Is.EqualTo(1f).Within(0.001f));
+
+            movement.SetHorizontalInput(0f);
+            movement.SimulateStep(0.2f);
+            Assert.That(gameObject.transform.position.x, Is.EqualTo(1f).Within(0.001f));
+
+            movement.SetHorizontalInput(-1f);
+            movement.SimulateStep(0.2f);
+            Assert.That(gameObject.transform.position.x, Is.EqualTo(0f).Within(0.001f));
+            Object.DestroyImmediate(gameObject);
+        }
+
+        [Test]
         public void CameraController_ClampsRequestedTargetAndFinalPosition()
         {
             GameObject gameObject = new GameObject("CameraControllerTest");

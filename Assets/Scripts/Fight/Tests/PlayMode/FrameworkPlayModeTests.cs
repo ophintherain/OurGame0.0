@@ -35,7 +35,7 @@ namespace Spotlight.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator GameplayGreybox_RoutesUiAndWorldByFixedPriority()
+        public IEnumerator GameplayGreybox_RoutesUiAndInteractionWithoutClickMovement()
         {
             yield return SceneManager.LoadSceneAsync("Gameplay", LoadSceneMode.Single);
             yield return null;
@@ -60,7 +60,9 @@ namespace Spotlight.Tests.PlayMode
             Assert.That(probe.InteractionCount, Is.EqualTo(beforeInteraction + 1));
 
             Vector2 walkablePoint = camera.WorldToScreenPoint(new Vector3(0f, -2f, 0f));
-            Assert.That(router.RoutePointerDown(walkablePoint), Is.EqualTo(InputRouteResult.Movement));
+            float targetBeforeClick = player.TargetX;
+            Assert.That(router.RoutePointerDown(walkablePoint), Is.EqualTo(InputRouteResult.Ignored));
+            Assert.That(player.TargetX, Is.EqualTo(targetBeforeClick));
 
             router.SetInputEnabled(false);
             float playerTargetBeforeLockedClick = player.TargetX;
@@ -148,6 +150,25 @@ namespace Spotlight.Tests.PlayMode
             Assert.That(battle.TryEscape(), Is.True);
             Assert.That(battle.LastResult.Outcome, Is.EqualTo(BattleOutcome.Escaped));
             Assert.That(phases.CurrentPhase, Is.EqualTo(GameplayPhase.BattleResult));
+        }
+
+        [UnityTest]
+        public IEnumerator FightScene_StartsBattleAutomatically()
+        {
+            yield return SceneManager.LoadSceneAsync("fight_1", LoadSceneMode.Single);
+            BattleCoordinator battle = Object.FindObjectOfType<BattleCoordinator>();
+            Assert.That(battle, Is.Not.Null);
+
+            float deadline = Time.realtimeSinceStartup + 3f;
+            while (!battle.IsBattleActive && Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            Assert.That(battle.IsBattleActive, Is.True);
+            Assert.That(Object.FindObjectOfType<GameplayCoordinator>().CurrentPhase,
+                Is.EqualTo(GameplayPhase.Battling));
+            Assert.That(GameObject.Find("BattleEnvironment"), Is.Not.Null);
         }
 
         private static GameObject CreateBootstrap(string name, bool autoStart)

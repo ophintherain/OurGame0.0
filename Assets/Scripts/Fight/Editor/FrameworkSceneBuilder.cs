@@ -19,12 +19,13 @@ namespace Spotlight.Editor
         private const string ModulesFolder = "Assets/Modules";
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
+        private const string FirstFightPath = ScenesFolder + "/fight/fight_1.unity";
         private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
         private const string BattleDataFolder = ModulesFolder + "/Battle/Data";
         private const string PrototypeWeaponPath = BattleDataFolder + "/PrototypeWeapon.asset";
         private const string PrototypeShotgunPath = BattleDataFolder + "/PrototypeShotgun.asset";
         private const string PrototypeRiflePath = BattleDataFolder + "/PrototypeRifle.asset";
-        private const string ArtworkFolder = "Assets/Image";
+        private const string ArtworkFolder = "Assets/sprite";
 
         private static readonly string[] DeferredFolders =
         {
@@ -379,6 +380,10 @@ namespace Spotlight.Editor
         private static void ConfigureBuildSettings()
         {
             var scenePaths = new List<string> { BootstrapPath, GameplayPath };
+            if (File.Exists(FirstFightPath))
+            {
+                scenePaths.Add(FirstFightPath);
+            }
             if (File.Exists(SampleScenePath))
             {
                 scenePaths.Add(SampleScenePath);

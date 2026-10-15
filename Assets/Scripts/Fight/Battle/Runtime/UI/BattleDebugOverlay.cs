@@ -60,7 +60,7 @@ namespace Spotlight.Battle
                 {
                     lastFeedback = battle.TryStartOrRestart() ? "Battle started" : "Cannot start battle";
                 }
-                GUILayout.Label("Keyboard: A/D left-right | 1/2 front-back | R/T posture | Shift stand");
+                GUILayout.Label("Keyboard: A/D left-right | W on table | S under table | Shift stand | 1/2 lane");
                 GUILayout.Label("F/G/H weapons | Ctrl overview zoom | E escape | Enter restart");
                 GUILayout.EndArea();
                 return;
@@ -78,8 +78,8 @@ namespace Spotlight.Battle
 
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Stand (Shift)")) Invoke(() => player.TrySetPosture(PlayerPosture.Standing), "Stand");
-            if (GUILayout.Button("Prone (R)")) Invoke(() => player.TryTogglePosture(PlayerPosture.Prone), "Prone toggle");
-            if (GUILayout.Button("On Table (T)")) Invoke(() => player.TryTogglePosture(PlayerPosture.OnTable), "On table toggle");
+            if (GUILayout.Button("Under Table (S)")) Invoke(() => player.TryTogglePosture(PlayerPosture.Prone), "Prone toggle");
+            if (GUILayout.Button("On Table (W)")) Invoke(() => player.TryTogglePosture(PlayerPosture.OnTable), "On table toggle");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();

@@ -42,16 +42,25 @@ namespace Spotlight
             }
 
             RouteKeyboardCommands();
+            RouteExplorationMovement();
         }
 
         public void SetInputEnabled(bool enabled)
         {
             inputEnabled = enabled;
+            if (!enabled)
+            {
+                playerMovement?.SetHorizontalInput(0f);
+            }
         }
 
         public void SetWorldInputEnabled(bool enabled)
         {
             worldInputEnabled = enabled;
+            if (!enabled)
+            {
+                playerMovement?.SetHorizontalInput(0f);
+            }
         }
 
         public void SetCommandSink(IGameplayInputSink sink)
@@ -94,13 +103,6 @@ namespace Spotlight
             {
                 interactionController?.TryInteract(interactionTarget);
                 return Resolve(InputRouteResult.Interaction);
-            }
-
-            Collider2D walkableTarget = Physics2D.OverlapPoint(worldPoint, walkableMask);
-            if (walkableTarget != null)
-            {
-                playerMovement?.SetTargetX(world.x);
-                return Resolve(InputRouteResult.Movement);
             }
 
             return Resolve(InputRouteResult.Ignored);
@@ -147,8 +149,8 @@ namespace Spotlight
             if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) RouteCommand(GameplayInputCommand.MoveRight);
             if (Input.GetKeyDown(KeyCode.Alpha1)) RouteCommand(GameplayInputCommand.LaneFront);
             if (Input.GetKeyDown(KeyCode.Alpha2)) RouteCommand(GameplayInputCommand.LaneBack);
-            if (Input.GetKeyDown(KeyCode.R)) RouteCommand(GameplayInputCommand.Prone);
-            if (Input.GetKeyDown(KeyCode.T)) RouteCommand(GameplayInputCommand.OnTable);
+            if (Input.GetKeyDown(KeyCode.S)) RouteCommand(GameplayInputCommand.Prone);
+            if (Input.GetKeyDown(KeyCode.W)) RouteCommand(GameplayInputCommand.OnTable);
             if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) RouteCommand(GameplayInputCommand.Stand);
             if (Input.GetKeyDown(KeyCode.F)) RouteCommand(GameplayInputCommand.UseWeapon1);
             if (Input.GetKeyDown(KeyCode.G)) RouteCommand(GameplayInputCommand.UseWeapon2);
@@ -156,6 +158,24 @@ namespace Spotlight
             if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl)) RouteCommand(GameplayInputCommand.ToggleOverviewZoom);
             if (Input.GetKeyDown(KeyCode.E)) RouteCommand(GameplayInputCommand.Escape);
             if (Input.GetKeyDown(KeyCode.Return)) RouteCommand(GameplayInputCommand.StartOrRestart);
+        }
+
+        private void RouteExplorationMovement()
+        {
+            if (playerMovement == null || !playerMovement.enabled)
+            {
+                return;
+            }
+
+            if (!inputEnabled || !worldInputEnabled)
+            {
+                playerMovement.SetHorizontalInput(0f);
+                return;
+            }
+
+            float left = Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f;
+            float right = Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) ? 1f : 0f;
+            playerMovement.SetHorizontalInput(left + right);
         }
     }
 }

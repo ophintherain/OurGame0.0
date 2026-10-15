@@ -9,6 +9,7 @@ namespace Spotlight
         [SerializeField] private float maxX = 8f;
 
         private float targetX;
+        private float horizontalInput;
 
         public float TargetX => targetX;
         public float MinX => minX;
@@ -41,11 +42,28 @@ namespace Spotlight
             targetX = Mathf.Clamp(worldX, minX, maxX);
         }
 
+        public void SetHorizontalInput(float direction)
+        {
+            float next = Mathf.Clamp(direction, -1f, 1f);
+            if (horizontalInput != 0f && next == 0f)
+            {
+                targetX = transform.position.x;
+            }
+            horizontalInput = next;
+        }
+
         public void SimulateStep(float deltaTime)
         {
             Vector3 current = transform.position;
             float clampedCurrentX = Mathf.Clamp(current.x, minX, maxX);
-            float nextX = Mathf.MoveTowards(clampedCurrentX, targetX, speed * Mathf.Max(0f, deltaTime));
+            float distance = speed * Mathf.Max(0f, deltaTime);
+            float nextX = horizontalInput == 0f
+                ? Mathf.MoveTowards(clampedCurrentX, targetX, distance)
+                : clampedCurrentX + horizontalInput * distance;
+            if (horizontalInput != 0f)
+            {
+                targetX = Mathf.Clamp(nextX, minX, maxX);
+            }
             transform.position = new Vector3(Mathf.Clamp(nextX, minX, maxX), current.y, current.z);
         }
     }
