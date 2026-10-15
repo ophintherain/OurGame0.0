@@ -10,8 +10,8 @@ public class UIBlinkController : MonoBehaviour
     public Image hpBarImage;   // 血条图片
 
     [Header("闪烁参数")]
-    public float blinkFrequency = 0.5f; // 闪烁一次（亮→暗→亮）的间隔，越小闪越快
-    public float blinkFullTime = 1.0f;   // 闪烁的总时间，闪烁次数等于blinkFullTime/blinkFrequency向下取整
+    public float blinkFrequency = 0.4f; // 闪烁一次（亮→暗→亮）的间隔，越小闪越快
+    public float blinkFullTime = 0.8f;   // 闪烁的总时间，闪烁次数等于blinkFullTime/blinkFrequency向下取整
     private Coroutine _blinkCoroutine;
 
     /// <summary>
