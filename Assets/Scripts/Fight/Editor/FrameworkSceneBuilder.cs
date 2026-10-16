@@ -313,6 +313,12 @@ namespace Spotlight.Editor
                 new Vector3(x, y, 0f), size, new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
             CoverController cover = table.AddComponent<CoverController>();
             cover.Configure(new BattlePosition(lane, column), 1);
+            if (lane == BattleLane.Foreground)
+            {
+                int maskNumber = column == 2 ? 3 : column == 4 ? 2 : 1;
+                cover.ConfigureBrokenMask(AssetDatabase.LoadAssetAtPath<Sprite>(
+                    ArtworkFolder + "/Carriage/1/010" + maskNumber + ".png"));
+            }
             table.GetComponent<BoxCollider2D>().offset = lane == BattleLane.Foreground
                 ? new Vector2(0f, 1f) : new Vector2(0f, 0.48f);
             table.GetComponent<SpriteRenderer>().enabled = false;

@@ -826,6 +826,9 @@ MonoBehaviour:
   lane: 0
   column: 2
   maximumBlockCount: 1
+  brokenMask: {fileID: 21300000, guid: 17757520121f485098f2925cc30d7308, type: 3}
+  maskCanvasCenter: {x: 0, y: -1.4}
+  maskCanvasSize: {x: 17.78, y: 10}
 --- !u!1 &419045930
 GameObject:
   m_ObjectHideFlags: 0
@@ -2195,6 +2198,9 @@ MonoBehaviour:
   lane: 0
   column: 4
   maximumBlockCount: 1
+  brokenMask: {fileID: 21300000, guid: 1c97a70d42ce4837b66edcc177234792, type: 3}
+  maskCanvasCenter: {x: 0, y: -1.4}
+  maskCanvasSize: {x: 17.78, y: 10}
 --- !u!1 &917208258
 GameObject:
   m_ObjectHideFlags: 0
@@ -3766,6 +3772,9 @@ MonoBehaviour:
   lane: 0
   column: 6
   maximumBlockCount: 1
+  brokenMask: {fileID: 21300000, guid: 0160e65e94e04e13931f2d61c61e5753, type: 3}
+  maskCanvasCenter: {x: 0, y: -1.4}
+  maskCanvasSize: {x: 17.78, y: 10}
 --- !u!61 &1758962991
 BoxCollider2D:
   m_ObjectHideFlags: 0

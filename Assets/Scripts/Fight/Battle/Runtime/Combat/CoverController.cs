@@ -8,6 +8,11 @@ namespace Spotlight.Battle
         [SerializeField] private BattleLane lane = BattleLane.Foreground;
         [SerializeField] private int column = 3;
         [SerializeField, Min(0)] private int maximumBlockCount = 1;
+        [SerializeField] private Sprite brokenMask;
+        [SerializeField] private Vector2 maskCanvasCenter = new Vector2(0f, -1.4f);
+        [SerializeField] private Vector2 maskCanvasSize = new Vector2(17.78f, 10f);
+
+        private SpriteRenderer maskRenderer;
 
         public event Action Broken;
 
@@ -26,6 +31,12 @@ namespace Spotlight.Battle
         public void ResetCover()
         {
             RemainingBlockCount = Mathf.Max(0, maximumBlockCount);
+            UpdateVisual();
+        }
+
+        public void ConfigureBrokenMask(Sprite mask)
+        {
+            brokenMask = mask;
             UpdateVisual();
         }
 
@@ -54,13 +65,27 @@ namespace Spotlight.Battle
 
         private void UpdateVisual()
         {
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null)
+            if (brokenMask == null)
             {
-                spriteRenderer.color = IsBroken
-                    ? new Color(0.25f, 0.25f, 0.25f, 0.7f)
-                    : new Color(0.55f, 0.34f, 0.18f, 1f);
+                if (maskRenderer != null) maskRenderer.enabled = false;
+                return;
             }
+
+            if (!IsBroken && maskRenderer == null) return;
+            if (maskRenderer == null)
+            {
+                GameObject maskObject = new GameObject("BrokenTableMask");
+                maskObject.transform.SetParent(transform.parent, false);
+                maskRenderer = maskObject.AddComponent<SpriteRenderer>();
+                maskRenderer.sortingOrder = 21;
+            }
+
+            maskRenderer.sprite = brokenMask;
+            maskRenderer.transform.localPosition = maskCanvasCenter;
+            Vector2 spriteSize = brokenMask.rect.size / brokenMask.pixelsPerUnit;
+            maskRenderer.transform.localScale = new Vector3(
+                maskCanvasSize.x / spriteSize.x, maskCanvasSize.y / spriteSize.y, 1f);
+            maskRenderer.enabled = IsBroken;
         }
     }
 }
