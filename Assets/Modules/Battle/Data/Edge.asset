@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8338c73f963a35347914f3e2454d620b, type: 3}
-  m_Name: PrototypeWeapon
-  m_EditorClassIdentifier: 
-  id: prototype_sidearm
-  displayName: Prototype Sidearm
-  damage: 120
-  cooldownSeconds: 1.25
-  rangeColumns: 4
+  m_Name: Edge
+  m_EditorClassIdentifier:
+  id: edge
+  displayName: 夺锋
+  damage: 0
+  cooldownSeconds: 10
+  rangeColumns: 7
   damageKind: 1
+  skill: 8
+  availableFromCarriage: 3
+  priority: 8

@@ -11,6 +11,9 @@ namespace Spotlight.Battle
         [SerializeField, Min(0f)] private float cooldownSeconds = 1.25f;
         [SerializeField, Min(0)] private int rangeColumns = 4;
         [SerializeField] private DamageKind damageKind = DamageKind.Ranged;
+        [SerializeField] private WeaponSkill skill = WeaponSkill.DirectDamage;
+        [SerializeField, Min(1)] private int availableFromCarriage = 1;
+        [SerializeField, Range(1, 9)] private int priority = 1;
 
         public string Id => id;
         public string DisplayName => displayName;
@@ -18,6 +21,9 @@ namespace Spotlight.Battle
         public float CooldownSeconds => cooldownSeconds;
         public int RangeColumns => rangeColumns;
         public DamageKind DamageKind => damageKind;
+        public WeaponSkill Skill => skill;
+        public int AvailableFromCarriage => availableFromCarriage;
+        public int Priority => priority;
 
         public void Configure(string weaponId, string weaponName, float weaponDamage,
             float cooldown, int range, DamageKind kind)
@@ -28,6 +34,13 @@ namespace Spotlight.Battle
             cooldownSeconds = Mathf.Max(0f, cooldown);
             rangeColumns = Mathf.Max(0, range);
             damageKind = kind;
+        }
+
+        public void ConfigureSkill(WeaponSkill weaponSkill, int carriage, int skillPriority = 1)
+        {
+            skill = weaponSkill;
+            availableFromCarriage = Mathf.Max(1, carriage);
+            priority = Mathf.Clamp(skillPriority, 1, 9);
         }
     }
 }
