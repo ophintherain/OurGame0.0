@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8338c73f963a35347914f3e2454d620b, type: 3}
-  m_Name: PrototypeRifle
+  m_Name: Needle
   m_EditorClassIdentifier: 
-  id: prototype_rifle
-  displayName: Prototype Rifle
-  damage: 80
-  cooldownSeconds: 0.65
-  rangeColumns: 6
+  id: needle
+  displayName: 针刺
+  damage: 0
+  cooldownSeconds: 10
+  rangeColumns: 7
   damageKind: 1
+  skill: 2
+  availableFromCarriage: 1
+  priority: 2

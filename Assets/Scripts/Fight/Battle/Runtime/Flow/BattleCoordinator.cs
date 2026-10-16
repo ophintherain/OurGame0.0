@@ -26,6 +26,8 @@ namespace Spotlight.Battle
         public bool IsBattleActive { get; private set; }
         public BattleResult LastResult { get; private set; }
         public bool HasPendingWeaponDiscard => LastResult.RequiresWeaponDiscard;
+        public System.Collections.Generic.IReadOnlyList<CoverController> Covers => covers ?? Array.Empty<CoverController>();
+        public BattleArena Arena => arena;
 
         public void Configure(GameplayCoordinator phases, InputRouter router, PlayerMovement exploreMovement,
             PlayerBattleController battlePlayer, BossController battleBoss, WeaponController weaponController,
@@ -93,10 +95,15 @@ namespace Spotlight.Battle
 
             player.Health?.ResetToFull();
             player.BeginBattle();
+            boss.SetWeaponController(weapons);
+            weapons?.ConfigureCarriage(boss.CarriageIndex);
             boss.BeginBattle();
             weapons?.BeginBattle();
             LastResult = default;
             IsBattleActive = true;
+            BattleHitFeedback feedback = GetComponent<BattleHitFeedback>();
+            if (feedback == null) feedback = gameObject.AddComponent<BattleHitFeedback>();
+            feedback.Configure(this, player, boss, weapons, cameraRig);
 
             if (!gameplayCoordinator.TryChangePhase(GameplayPhase.Battling))
             {
@@ -152,11 +159,18 @@ namespace Spotlight.Battle
 
         public bool TryEscape()
         {
-            if (!IsBattleActive || !arena.IsEscapePosition(player.Position))
+            if (!IsBattleActive || !player.CanAct || !arena.IsEscapePosition(player.Position))
             {
                 return false;
             }
 
+            Finish(BattleOutcome.Escaped);
+            return true;
+        }
+
+        public bool TryReturnToLoadoutForDebug()
+        {
+            if (!IsBattleActive) return false;
             Finish(BattleOutcome.Escaped);
             return true;
         }
@@ -238,6 +252,7 @@ namespace Spotlight.Battle
             IsBattleActive = false;
             player.EndBattle();
             boss.EndBattle();
+            weapons?.EndBattle();
             float playerHealth = player.Health != null ? player.Health.CurrentHealth : 0f;
             bool needsDiscard = outcome == BattleOutcome.BossDefeated && player.Health != null &&
                                 player.Health.Normalized < 0.3f && weapons != null &&
