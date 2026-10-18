@@ -81,3 +81,6 @@ crashlytics-build.properties
 
 # Unity Test Runner generated reports (keep TestResults/.gitkeep)
 /TestResults/*.xml
+
+# qhdll Agent Files
+/Docs/
