@@ -31,21 +31,31 @@ namespace Spotlight.Exploration
         private bool controlEnabled = true;
 
         [SerializeField]
-        [Tooltip("站立时的视觉缩放")]
-        private Vector3 standingScale = Vector3.one;
-
-        [SerializeField]
-        [Tooltip("匍匐时的视觉缩放（压扁）")]
-        private Vector3 proneScale = new Vector3(1.25f, 0.5f, 1f);
-
-        [SerializeField]
-        [Tooltip("上桌时相对站立位置向上抬高的距离（世界单位）。按「桌面高度 − groundY」来填，填 0 就是原地不抬")]
+        [Tooltip("上桌时相对站立位置向上抬高的距离（世界单位）。按「桌面高度 − groundY」来填；填 0 = 不抬，外观完全交给动画")]
         private float onTableHeight = 0.6f;
+
+        [SerializeField]
+        [Tooltip("站立状态下显示的物体。可直接拖预制体资源（脚本启动时实例化成子物体）或场景里的物体；留空则该姿势用下面的占位方块")]
+        private GameObject standingVisual;
+
+        [SerializeField]
+        [Tooltip("匍匐状态下显示的物体。可直接拖预制体资源（脚本启动时实例化成子物体）或场景里的物体；留空则该姿势用下面的占位方块")]
+        private GameObject proneVisual;
+
+        [SerializeField]
+        [Tooltip("占位方块：当前姿势没有配立绘时显示它，配了就隐藏。留空会自动取 Player 自己身上的 SpriteRenderer")]
+        private SpriteRenderer placeholderVisual;
+
+        private GameObject standingVisualInstance;
+        private GameObject proneVisualInstance;
 
         private Vector3 moveStartPosition;
         private Vector3 targetPosition;
         private float moveDuration;
         private float moveElapsed;
+        private bool hasPendingPosture;
+        private ExplorationPosture pendingPosture;
+        private int facing = 1; // 1 = 面向右，-1 = 面向左
 
         /// <summary>开始移动（旧格号, 新格号）。每次按键效果在起步这一帧就派发。</summary>
         public event Action<int, int> MoveStarted;
@@ -68,6 +78,9 @@ namespace Spotlight.Exploration
         /// <summary>移动速度（世界单位/秒），只读。</summary>
         public float MoveSpeed => moveSpeed;
 
+        /// <summary>当前是否响应控制输入（背包等界面打开时为 false），只读。</summary>
+        public bool ControlEnabled => controlEnabled;
+
         private void Awake()
         {
             if (map == null)
@@ -80,7 +93,41 @@ namespace Spotlight.Exploration
             CurrentColumn = map.ClampColumn(startingColumn);
             targetPosition = map.GetWorldPosition(CurrentColumn);
             transform.position = targetPosition;
+            placeholderVisual ??= GetComponent<SpriteRenderer>();
+            standingVisualInstance = ResolveVisual(standingVisual);
+            proneVisualInstance = ResolveVisual(proneVisual);
             ApplyPose();
+
+            if (placeholderVisual == null && standingVisualInstance == null && proneVisualInstance == null)
+            {
+                Debug.LogWarning("[Exploration] 角色没有任何可显示的外观：占位方块与立绘都为空（Player 上也没有 SpriteRenderer）。", this);
+            }
+        }
+
+        /// <summary>
+        /// 把「视觉物体」解析成场景里的实例：拖的是预制体资源就实例化成子物体，
+        /// 拖的是场景里的物体就直接复用。返回 null 表示该姿势不做显隐控制。
+        /// </summary>
+        private GameObject ResolveVisual(GameObject source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            if (source.scene.IsValid())
+            {
+                // 已经是场景里的物体，直接用（位置由它自己决定）
+                return source;
+            }
+
+            // 预制体资源不属于任何场景（scene.IsValid() 为 false），需要实例化才能出现在场景里。
+            // 预制体根节点可能自带位置/朝向（比如由摆好位置的场景物体拖成预制体），这里归零，
+            // 保证立绘与角色对齐；预制体内部的子物体偏移不受影响。
+            GameObject instance = Instantiate(source, transform);
+            instance.transform.localPosition = Vector3.zero;
+            instance.transform.localRotation = Quaternion.identity;
+            return instance;
         }
 
         private void Update()
@@ -106,6 +153,8 @@ namespace Spotlight.Exploration
             {
                 return false;
             }
+
+            SetFacing(direction);
 
             int next = map.ClampColumn(CurrentColumn + Math.Sign(direction));
             if (next == CurrentColumn)
@@ -147,50 +196,69 @@ namespace Spotlight.Exploration
 
         private void ReadKeyboard()
         {
+            // 记录按键之前的姿势。方向键先处理（移动会自动恢复站立），
+            // 所以 W/S 的规则必须按「按键那一刻」的姿势判定，否则同帧 D+S 会被误判成「站立→匍匐」。
+            ExplorationPosture postureBeforeInput = Posture;
+
             if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             {
+                SetFacing(-1);
                 TryMove(-1);
             }
 
             if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             {
+                SetFacing(1);
                 TryMove(1);
             }
 
             if (Input.GetKeyDown(KeyCode.W))
             {
-                TryChangePostureByKey(ExplorationPosture.OnTable);
+                RequestPosture(ExplorationPosture.OnTable, postureBeforeInput);
             }
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                TryChangePostureByKey(ExplorationPosture.Prone);
+                RequestPosture(ExplorationPosture.Prone, postureBeforeInput);
             }
         }
 
         /// <summary>
-        /// W / S 的姿势规则：
-        /// 站立时按 W 上桌（需桌子格）、按 S 匍匐；
-        /// 匍匐时按 W 恢复站立，按 S 无操作；
-        /// 上桌时按 S 下桌恢复站立，按 W 无操作。
+        /// W / S 的姿势规则：已在目标姿势（桌上按 W / 匍匐按 S）无操作；
+        /// 处于另一种非站立姿势（匍匐按 W / 桌上按 S）恢复站立；站立时切到目标姿势。
+        /// 若这一帧刚按了方向键、正在移动，则先把结果记下来，等走到位那一刻再执行。
         /// </summary>
-        private void TryChangePostureByKey(ExplorationPosture target)
+        private void RequestPosture(ExplorationPosture target, ExplorationPosture postureBeforeInput)
         {
-            // 已经在目标姿势（桌上按 W / 匍匐按 S）：无操作
-            if (Posture == target)
+            if (postureBeforeInput == target)
             {
                 return;
             }
 
-            // 当前是另一种姿势（匍匐按 W / 桌上按 S）：恢复站立
-            if (Posture != ExplorationPosture.Standing)
+            ExplorationPosture desired = postureBeforeInput == ExplorationPosture.Standing
+                ? target
+                : ExplorationPosture.Standing;
+
+            if (IsMoving)
             {
-                TrySetPosture(ExplorationPosture.Standing);
+                pendingPosture = desired;
+                hasPendingPosture = true;
                 return;
             }
 
-            // 站立：切到目标姿势
-            TrySetPosture(target);
+            TrySetPosture(desired);
+        }
+
+        /// <summary>移动到位后执行排队中的姿势请求。目标格不允许时由 TrySetPosture 拒绝，即自动丢弃。</summary>
+        private void ApplyPendingPosture()
+        {
+            if (!hasPendingPosture)
+            {
+                return;
+            }
+
+            hasPendingPosture = false;
+            TrySetPosture(pendingPosture);
         }
 
         private void AdvanceMovement(float deltaTime)
@@ -209,6 +277,7 @@ namespace Spotlight.Exploration
             {
                 transform.position = targetPosition;
                 IsMoving = false;
+                ApplyPendingPosture();
                 MoveCompleted?.Invoke(CurrentColumn);
             }
         }
@@ -226,13 +295,79 @@ namespace Spotlight.Exploration
             PostureChanged?.Invoke(previous, next);
         }
 
-        /// <summary>把姿势应用到表现：匍匐压扁，上桌整体抬高，其余恢复站立外观。</summary>
+        /// <summary>
+        /// 姿势的表现：上桌时整体抬到桌面高度；按姿势切换立绘显隐。
+        /// 当前姿势没有配立绘时显示占位方块，配了立绘就把占位方块隐藏 —— 有立绘用立绘，没立绘用方块。
+        /// </summary>
         private void ApplyPose()
         {
+            float lift = Posture == ExplorationPosture.OnTable ? onTableHeight : 0f;
             Vector3 position = transform.position;
-            position.y = map.GroundY + (Posture == ExplorationPosture.OnTable ? onTableHeight : 0f);
+            position.y = map.GroundY + lift;
             transform.position = position;
-            transform.localScale = Posture == ExplorationPosture.Prone ? proneScale : standingScale;
+
+            bool isProne = Posture == ExplorationPosture.Prone;
+            if (standingVisualInstance != null)
+            {
+                standingVisualInstance.SetActive(!isProne);
+            }
+
+            if (proneVisualInstance != null)
+            {
+                proneVisualInstance.SetActive(isProne);
+            }
+
+            if (placeholderVisual != null)
+            {
+                placeholderVisual.enabled = isProne ? proneVisualInstance == null : standingVisualInstance == null;
+            }
+
+            ApplyFacing();
+        }
+
+        /// <summary>设置朝向：+1 面向右，-1 面向左。朝向变化时立即刷新表现。</summary>
+        private void SetFacing(int direction)
+        {
+            if (direction == 0)
+            {
+                return;
+            }
+
+            int next = direction > 0 ? 1 : -1;
+            if (next == facing)
+            {
+                return;
+            }
+
+            facing = next;
+            ApplyFacing();
+        }
+
+        /// <summary>
+        /// 朝向表现：立绘整体水平镜像，占位方块用 SpriteRenderer.flipX。
+        /// 只改立绘自己的 localScale.x 符号，不会改动 Player 本体或格子的坐标。
+        /// </summary>
+        private void ApplyFacing()
+        {
+            ApplyFacingTo(standingVisualInstance);
+            ApplyFacingTo(proneVisualInstance);
+
+            if (placeholderVisual != null)
+            {
+                placeholderVisual.flipX = facing < 0;
+            }
+        }
+
+        private void ApplyFacingTo(GameObject visual)
+        {
+            if (visual == null)
+            {
+                return;
+            }
+
+            Vector3 scale = visual.transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facing;
+            visual.transform.localScale = scale;
         }
     }
 }
