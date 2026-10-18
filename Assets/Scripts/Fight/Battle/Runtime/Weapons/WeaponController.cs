@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spotlight.Battle
@@ -12,8 +13,11 @@ namespace Spotlight.Battle
         [SerializeField] private BossController boss;
         [SerializeField] private BattleArena arena;
         [SerializeField, Range(1, 3)] private int carriageIndex = 1;
+        [SerializeField] private bool unlockAllWeaponsForTesting;
 
         private readonly BattleLoadout loadout = new BattleLoadout();
+        private readonly List<int> selectedOrder = new List<int>(BattleLoadout.MaximumWeapons);
+        private bool selectionPrepared;
         private float needleRemaining;
         private float needleTickRemaining;
         private BattlePosition needlePosition;
@@ -37,6 +41,21 @@ namespace Spotlight.Battle
         public BattleLoadout Loadout => loadout;
         public System.Collections.Generic.IReadOnlyList<WeaponDefinition> AvailableWeapons => availableWeapons;
         public int CarriageIndex => carriageIndex;
+        public int SelectedCount
+        {
+            get
+            {
+                EnsureInventoryInitialized();
+                return selectedOrder.Count;
+            }
+        }
+
+        public WeaponDefinition SelectedWeaponAt(int slot)
+        {
+            if (slot < 0 || slot >= selectedOrder.Count) return null;
+            int index = selectedOrder[slot];
+            return index >= 0 && index < availableWeapons.Length ? availableWeapons[index] : null;
+        }
         public float SharedSkillDamageMultiplier => edgeRemaining > 0f ||
             (boss != null && boss.IsBorrowedEdgeActive) ? 1.5f : 1f;
         public WeaponSkill LastUsedSkill => lastUsedSkill;
@@ -66,12 +85,15 @@ namespace Spotlight.Battle
             BossController battleBoss, BattleArena battleArena)
         {
             availableWeapons = weapons ?? Array.Empty<WeaponDefinition>();
+            selectedOrder.Clear();
+            selectionPrepared = false;
             selectedWeapons = new bool[availableWeapons.Length];
             ownedWeapons = new bool[availableWeapons.Length];
             for (int index = 0; index < selectedWeapons.Length && index < BattleLoadout.MaximumWeapons; index++)
             {
                 ownedWeapons[index] = availableWeapons[index] != null;
                 selectedWeapons[index] = availableWeapons[index] != null;
+                if (selectedWeapons[index]) selectedOrder.Add(index);
             }
             for (int index = BattleLoadout.MaximumWeapons; index < ownedWeapons.Length; index++)
             {
@@ -85,6 +107,19 @@ namespace Spotlight.Battle
         public void ConfigureCarriage(int carriage)
         {
             carriageIndex = Mathf.Clamp(carriage, 1, 3);
+        }
+
+        public void ConfigureTestingUnlock(bool enabled)
+        {
+            unlockAllWeaponsForTesting = enabled;
+        }
+
+        public void PrepareSelection()
+        {
+            EnsureInventoryInitialized();
+            selectionPrepared = true;
+            selectedOrder.Clear();
+            for (int index = 0; index < selectedWeapons.Length; index++) selectedWeapons[index] = false;
         }
 
         public void BeginBattle()
@@ -106,12 +141,10 @@ namespace Spotlight.Battle
             SubscribeHealth();
             EnsureInventoryInitialized();
             loadout.Clear();
-            for (int index = 0; index < availableWeapons.Length; index++)
+            for (int slot = 0; slot < selectedOrder.Count; slot++)
             {
-                if (IsSelected(index))
-                {
-                    loadout.TryAdd(availableWeapons[index]);
-                }
+                int index = selectedOrder[slot];
+                if (IsOwned(index)) loadout.TryAdd(availableWeapons[index]);
             }
         }
 
@@ -139,30 +172,33 @@ namespace Spotlight.Battle
         {
             return index >= 0 && index < ownedWeapons.Length && ownedWeapons[index] &&
                    availableWeapons[index] != null &&
-                   availableWeapons[index].AvailableFromCarriage <= carriageIndex;
+                   (unlockAllWeaponsForTesting ||
+                    availableWeapons[index].AvailableFromCarriage <= carriageIndex);
         }
 
         public bool TryToggleSelection(int index)
         {
-            if (index < 0 || index >= availableWeapons.Length || availableWeapons[index] == null ||
-                !IsOwned(index))
-            {
+            EnsureInventoryInitialized();
+            if (IsSelected(index)) return TryRemoveSelectionSlot(selectedOrder.IndexOf(index));
+            return TrySelect(index);
+        }
+
+        public bool TrySelect(int index)
+        {
+            EnsureInventoryInitialized();
+            if (!IsOwned(index) || IsSelected(index) || selectedOrder.Count >= BattleLoadout.MaximumWeapons)
                 return false;
-            }
-
-            if (selectedWeapons[index])
-            {
-                int selectedCount = 0;
-                foreach (bool selected in selectedWeapons) if (selected) selectedCount++;
-                if (selectedCount <= 1) return false;
-                selectedWeapons[index] = false;
-                return true;
-            }
-
-            int count = 0;
-            foreach (bool selected in selectedWeapons) if (selected) count++;
-            if (count >= BattleLoadout.MaximumWeapons) return false;
             selectedWeapons[index] = true;
+            selectedOrder.Add(index);
+            return true;
+        }
+
+        public bool TryRemoveSelectionSlot(int slot)
+        {
+            if (slot < 0 || slot >= selectedOrder.Count) return false;
+            int index = selectedOrder[slot];
+            selectedOrder.RemoveAt(slot);
+            selectedWeapons[index] = false;
             return true;
         }
 
@@ -176,6 +212,7 @@ namespace Spotlight.Battle
                 {
                     selectedWeapons[index] = false;
                     ownedWeapons[index] = false;
+                    selectedOrder.Remove(index);
                     break;
                 }
             }
@@ -250,6 +287,15 @@ namespace Spotlight.Battle
             if (weapon.Definition.Skill != WeaponSkill.Mimic)
                 lastUsedSkill = weapon.Definition.Skill;
             return true;
+        }
+
+        public bool TryUseForTesting(int availableIndex)
+        {
+            if (availableIndex < 0 || availableIndex >= availableWeapons.Length ||
+                availableWeapons[availableIndex] == null || !IsOwned(availableIndex)) return false;
+            loadout.Clear();
+            if (!loadout.TryAdd(availableWeapons[availableIndex])) return false;
+            return TryUse(0);
         }
 
         private void Update()
@@ -489,13 +535,22 @@ namespace Spotlight.Battle
 
             bool hasOwnedWeapon = false;
             foreach (bool owned in ownedWeapons) hasOwnedWeapon |= owned;
-            if (hasOwnedWeapon) return;
+            if (hasOwnedWeapon)
+            {
+                if (!selectionPrepared && selectedOrder.Count == 0)
+                {
+                    for (int index = 0; index < selectedWeapons.Length; index++)
+                        if (selectedWeapons[index]) selectedOrder.Add(index);
+                }
+                return;
+            }
 
             for (int index = 0; index < availableWeapons.Length; index++)
             {
                 ownedWeapons[index] = availableWeapons[index] != null;
                 selectedWeapons[index] = availableWeapons[index] != null &&
                                          index < BattleLoadout.MaximumWeapons;
+                if (selectedWeapons[index]) selectedOrder.Add(index);
             }
         }
     }

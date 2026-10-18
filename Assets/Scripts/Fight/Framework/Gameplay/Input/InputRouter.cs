@@ -78,14 +78,20 @@ namespace Spotlight
 
         public InputRouteResult RoutePointerDown(Vector2 screenPosition)
         {
-            if (!inputEnabled || !worldInputEnabled)
+            if (!inputEnabled)
             {
                 return Resolve(InputRouteResult.Disabled);
             }
 
             if (IsPointerOverUI(screenPosition))
             {
+                UISoundPlayer.Play(UISoundCue.Click);
                 return Resolve(InputRouteResult.UI);
+            }
+
+            if (!worldInputEnabled)
+            {
+                return Resolve(InputRouteResult.Disabled);
             }
 
             worldCamera ??= Camera.main;

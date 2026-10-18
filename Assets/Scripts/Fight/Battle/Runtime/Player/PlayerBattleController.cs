@@ -144,9 +144,9 @@ namespace Spotlight.Battle
 
             if (Position.Lane != BattleLane.Corridor)
             {
+                if (Posture != PlayerPosture.OnTable) return false;
                 if (!arena.TryFindNextTable(Position, direction, out BattlePosition landing))
                     return false;
-                if (Posture != PlayerPosture.OnTable) return SetPosition(landing, false);
                 Vector3 takeoff = transform.position;
                 walkRemaining = 0f;
                 if (!SetPosition(landing, false, false)) return false;

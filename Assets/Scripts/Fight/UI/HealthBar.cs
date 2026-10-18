@@ -27,11 +27,13 @@ public class HealthBar : MonoBehaviour
 
     public void ChangeHealth(float hp)
     {
+        float previousHealth = currentHealth;
         currentHealth = currentHealth + hp;
         SetHealth(currentHealth);
 
-        if(hp<0.0f)
+        if(currentHealth < previousHealth)
         {
+            Spotlight.UISoundPlayer.Play(Spotlight.UISoundCue.ExplorationDamage);
             UIBlinkController blinkUI = GetComponent<UIBlinkController>();
             if (blinkUI != null)
             {

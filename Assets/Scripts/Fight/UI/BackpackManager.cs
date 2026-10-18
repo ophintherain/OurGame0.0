@@ -53,6 +53,8 @@ public class BackpackManager : MonoBehaviour
     {
         bool newState = !backpackBg.gameObject.activeSelf;
         backpackBg.gameObject.SetActive(newState);
+        Spotlight.UISoundPlayer.Play(newState
+            ? Spotlight.UISoundCue.OpenBackpack : Spotlight.UISoundCue.CloseBackpack);
         if (newState)
         {
             RefreshCurrentTabGrid();
@@ -65,7 +67,9 @@ public class BackpackManager : MonoBehaviour
     /// <param name="isWeapon">true=武器分类，false=物品分类</param>
     void SwitchTab(bool isWeapon)
     {
+        if (isWeaponTabActive == isWeapon) return;
         isWeaponTabActive = isWeapon;
+        Spotlight.UISoundPlayer.Play(Spotlight.UISoundCue.PageTurn);
         weaponGridRoot.gameObject.SetActive(isWeaponTabActive);
         itemGridRoot.gameObject.SetActive(!isWeaponTabActive);
         RefreshCurrentTabGrid();

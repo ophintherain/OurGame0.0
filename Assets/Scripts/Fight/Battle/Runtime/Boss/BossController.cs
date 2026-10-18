@@ -70,6 +70,19 @@ namespace Spotlight.Battle
         public WeaponSkill BorrowedSkill => borrowedSkill;
         public WeaponSkill LastBorrowedSkill => lastBorrowedSkill;
         public bool IsBorrowedEdgeActive => borrowedEdgeRemaining > 0f;
+        private bool manualSkillTesting;
+
+        public void SetManualSkillTesting(bool enabled) => manualSkillTesting = enabled;
+
+        public void SetBorrowedSkillForTesting(WeaponSkill skill) => borrowedSkill = skill;
+
+        public void CastTripleStrikeForTesting()
+        {
+            if (!IsBattleActive || telegraphActive) return;
+            LastSkill = BossSkill.TripleStrike;
+            strikesRemaining = 3;
+            StartAttack(true);
+        }
         public BattleTelegraph ActiveTelegraph => pendingTelegraph;
 
         public void Configure(CombatHealth bossHealth, BossEnergy bossEnergy, BossMovement bossMovement,
@@ -200,6 +213,7 @@ namespace Spotlight.Battle
                 return;
             }
 
+            if (manualSkillTesting) return;
             attackCooldown -= step * (borrowedLeapRemaining > 0f ? 1f / 0.7f : 1f);
             if (energy != null && energy.IsFull)
             {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Spotlight.Battle
 {
@@ -16,15 +17,48 @@ namespace Spotlight.Battle
         public void Configure(BattleCoordinator coordinator, PlayerBattleController battlePlayer,
             BossController battleBoss, WeaponController weaponController)
         {
+            if (player != null) player.PostureChanged -= OnPostureChanged;
             battle = coordinator;
             player = battlePlayer;
             boss = battleBoss;
             weapons = weaponController;
+            SubscribePosture();
+        }
+
+        private void OnEnable()
+        {
+            SubscribePosture();
+        }
+
+        private void OnDisable()
+        {
+            if (player != null) player.PostureChanged -= OnPostureChanged;
+        }
+
+        private void SubscribePosture()
+        {
+            if (player == null) return;
+            player.PostureChanged -= OnPostureChanged;
+            player.PostureChanged += OnPostureChanged;
+        }
+
+        private static void OnPostureChanged(PlayerPosture previous, PlayerPosture current)
+        {
+            UISoundPlayer.Play(UISoundCue.SwitchAction);
+        }
+
+        private static bool ClickedButton(string label)
+        {
+            if (!GUILayout.Button(label)) return false;
+            UISoundPlayer.Play(UISoundCue.Click);
+            return true;
         }
 
         private void OnGUI()
         {
-            if (battle == null || player == null || boss == null)
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName != "fight_test" && sceneName != "Gameplay") return;
+            if (battle == null || player == null || boss == null || battle.IsLoadoutSelectionOpen)
             {
                 return;
             }
@@ -60,7 +94,7 @@ namespace Spotlight.Battle
             if (boss.HasCrowTelegraph)
                 GUILayout.Label($"CROW WARNING: {boss.CrowTelegraph.Primary}");
             GUILayout.Label(lastFeedback);
-            if (GUILayout.Button(showTableColliders ? "QA: Hide table colliders" : "QA: Show table colliders"))
+            if (ClickedButton(showTableColliders ? "QA: Hide table colliders" : "QA: Show table colliders"))
                 showTableColliders = !showTableColliders;
             if (showTableColliders)
                 GUILayout.Label("Yellow: front collider | Cyan: back collider | Green: middle cells");
@@ -72,7 +106,7 @@ namespace Spotlight.Battle
                 for (int carriage = 1; carriage <= 3; carriage++)
                 {
                     int selected = carriage;
-                    if (GUILayout.Button("Car " + carriage))
+                    if (ClickedButton("Car " + carriage))
                     {
                         boss.ConfigureCarriage(selected);
                         weapons?.ConfigureCarriage(selected);
@@ -87,7 +121,7 @@ namespace Spotlight.Battle
                     for (int index = 0; index < weapons.Loadout.Weapons.Count; index++)
                     {
                         int captured = index;
-                        if (GUILayout.Button("Discard: " + weapons.Loadout.Weapons[index].Definition.DisplayName))
+                        if (ClickedButton("Discard: " + weapons.Loadout.Weapons[index].Definition.DisplayName))
                         {
                             lastFeedback = battle.ResolveWeaponDiscard(captured)
                                 ? "Weapon discarded"
@@ -96,7 +130,7 @@ namespace Spotlight.Battle
                         }
                     }
                 }
-                if (GUILayout.Button(battle.LastResult.Outcome == BattleOutcome.None ? "Start Battle" : "Restart Battle"))
+                if (ClickedButton(battle.LastResult.Outcome == BattleOutcome.None ? "Start Battle" : "Restart Battle"))
                 {
                     lastFeedback = battle.TryStartOrRestart() ? "Battle started" : "Cannot start battle";
                 }
@@ -107,39 +141,39 @@ namespace Spotlight.Battle
             }
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Use 1 (F)")) Invoke(() => weapons != null && weapons.TryUse(0), "Use 1");
-            if (GUILayout.Button("Use 2 (G)")) Invoke(() => weapons != null && weapons.TryUse(1), "Use 2");
-            if (GUILayout.Button("Use 3 (H)")) Invoke(() => weapons != null && weapons.TryUse(2), "Use 3");
+            if (ClickedButton("Use 1 (F)")) Invoke(() => weapons != null && weapons.TryUse(0), "Use 1");
+            if (ClickedButton("Use 2 (G)")) Invoke(() => weapons != null && weapons.TryUse(1), "Use 2");
+            if (ClickedButton("Use 3 (H)")) Invoke(() => weapons != null && weapons.TryUse(2), "Use 3");
             GUILayout.EndHorizontal();
-            if (GUILayout.Button("Toggle Overview Zoom (Ctrl)"))
+            if (ClickedButton("Toggle Overview Zoom (Ctrl)"))
             {
                 Invoke(() => battle.TryToggleOverviewZoom(), "Overview zoom");
             }
-            if (GUILayout.Button("Escape (corridor left end only)"))
+            if (ClickedButton("Escape (corridor left end only)"))
             {
                 Invoke(() => battle.TryEscape(), "Escape");
             }
-            if (GUILayout.Button("QA: Return to loadout / switch carriage"))
+            if (ClickedButton("QA: Return to loadout / switch carriage"))
                 Invoke(() => battle.TryReturnToLoadoutForDebug(), "Return to loadout");
-            if (GUILayout.Button("QA: Cast borrowed boss skill"))
+            if (ClickedButton("QA: Cast borrowed boss skill"))
                 Invoke(() => boss.TryCastBorrowedSkill(), "Borrowed boss skill");
-            if (boss.CarriageIndex == 1 && GUILayout.Button("QA: Summon crow"))
+            if (boss.CarriageIndex == 1 && ClickedButton("QA: Summon crow"))
             {
                 boss.SummonCrow();
                 lastFeedback = boss.HasCrow ? "Crow summoned" : "Crow already active";
             }
-            if (boss.CarriageIndex == 2 && GUILayout.Button("QA: Boss invisibility (8s)"))
+            if (boss.CarriageIndex == 2 && ClickedButton("QA: Boss invisibility (8s)"))
             {
                 boss.ApplyInvisibility(8f);
                 lastFeedback = boss.IsInvisible ? "Boss invisible" : "Invisibility rejected";
             }
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("QA: Player -75 HP"))
+            if (ClickedButton("QA: Player -75 HP"))
             {
                 float applied = player.Health != null ? player.Health.ApplyDamage(75f) : 0f;
                 lastFeedback = applied > 0f ? "QA player damage applied" : "QA damage rejected";
             }
-            if (GUILayout.Button("QA: Boss -1100 HP"))
+            if (ClickedButton("QA: Boss -1100 HP"))
             {
                 float applied = boss.Health != null ? boss.Health.ApplyDamage(1100f) : 0f;
                 lastFeedback = applied > 0f ? "QA boss damage applied" : "QA damage rejected";
@@ -248,7 +282,7 @@ namespace Spotlight.Battle
                     continue;
                 }
                 string state = weapons.IsSelected(index) ? "[X]" : "[ ]";
-                if (GUILayout.Button($"{state} {definition.DisplayName}  CD {definition.CooldownSeconds:0}s  RANGE {definition.RangeColumns}"))
+                if (ClickedButton($"{state} {definition.DisplayName}  CD {definition.CooldownSeconds:0}s  RANGE {definition.RangeColumns}"))
                 {
                     lastFeedback = weapons.TryToggleSelection(captured)
                         ? "Loadout updated"

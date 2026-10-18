@@ -19,6 +19,8 @@ namespace Spotlight.Battle
         [SerializeField] private Sprite energyFill;
         [SerializeField] private WeaponController weapons;
         [SerializeField] private Sprite[] weaponIcons;
+        private Texture2D weaponSlotBottom;
+        private static readonly Rect WeaponSlotBottomPixels = new Rect(1099f, 562f, 150f, 159f);
 
         private static readonly Rect[] WeaponIconPixels =
         {
@@ -80,6 +82,14 @@ namespace Spotlight.Battle
         {
             weapons = weaponController;
             weaponIcons = icons;
+        }
+
+        public void DrawAvailableWeaponIcon(WeaponDefinition definition, Rect area)
+        {
+            int index = IconIndex(definition != null ? definition.Id : null);
+            if (index < 0 || index >= WeaponIconPixels.Length ||
+                weaponIcons == null || index >= weaponIcons.Length) return;
+            DrawWeaponIcon(weaponIcons[index], area, WeaponIconPixels[index]);
         }
 
         private void OnGUI()
@@ -172,17 +182,22 @@ namespace Spotlight.Battle
             int count = Mathf.Min(BattleLoadout.MaximumWeapons, weapons.Loadout.Weapons.Count);
             if (count == 0) return;
 
-            float slotWidth = Mathf.Clamp(Screen.width * 0.085f, 92f, 116f);
-            float slotHeight = slotWidth + 26f;
-            float spacing = Mathf.Clamp(Screen.width * 0.012f, 9f, 18f);
-            float startX = (Screen.width - count * slotWidth - (count - 1) * spacing) * 0.5f;
-            float top = Screen.height - slotHeight - 18f;
+            if (weaponSlotBottom == null)
+            {
+                Sprite slotSprite = Resources.Load<Sprite>("WeaponSlotBottom");
+                if (slotSprite != null) weaponSlotBottom = slotSprite.texture;
+            }
+            float slotWidth = Mathf.Clamp(Screen.width * 0.135f, 150f, 192f);
+            float slotHeight = slotWidth + 35f;
+            float spacing = Mathf.Clamp(Screen.width * 0.018f, 18f, 32f);
+            float startX = Screen.width - count * slotWidth - (count - 1) * spacing - 20f;
+            float top = Screen.height - slotHeight - 22f;
             string[] keys = { "F", "G", "H" };
 
             GUIStyle nameStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = Mathf.Clamp(Mathf.RoundToInt(slotWidth * 0.14f), 12, 17),
+                fontSize = Mathf.Clamp(Mathf.RoundToInt(slotWidth * 0.14f), 18, 27),
                 fontStyle = FontStyle.Bold,
                 normal = { textColor = new Color(1f, 0.93f, 0.78f) }
             };
@@ -194,7 +209,7 @@ namespace Spotlight.Battle
             GUIStyle cooldownStyle = new GUIStyle(nameStyle)
             {
                 alignment = TextAnchor.MiddleRight,
-                fontSize = 12
+                fontSize = 16
             };
 
             for (int slot = 0; slot < count; slot++)
@@ -202,9 +217,17 @@ namespace Spotlight.Battle
                 WeaponRuntime runtime = weapons.Loadout.Weapons[slot];
                 WeaponDefinition definition = runtime.Definition;
                 Rect card = new Rect(startX + slot * (slotWidth + spacing), top, slotWidth, slotHeight);
-                DrawTint(card, new Color(0.13f, 0.09f, 0.09f, 0.84f));
-                DrawTint(new Rect(card.x, card.y, card.width, 2f), new Color(0.75f, 0.61f, 0.42f));
-                Rect iconArea = new Rect(card.x + 7f, card.y + 8f, card.width - 14f, card.width - 12f);
+                if (weaponSlotBottom != null)
+                {
+                    Rect uv = new Rect(WeaponSlotBottomPixels.x / weaponSlotBottom.width,
+                        (weaponSlotBottom.height - WeaponSlotBottomPixels.yMax) / weaponSlotBottom.height,
+                        WeaponSlotBottomPixels.width / weaponSlotBottom.width,
+                        WeaponSlotBottomPixels.height / weaponSlotBottom.height);
+                    GUI.DrawTextureWithTexCoords(new Rect(card.x, card.y, slotWidth, slotWidth),
+                        weaponSlotBottom, uv, true);
+                }
+                Rect iconArea = new Rect(card.x + slotWidth * 0.20f, card.y + slotWidth * 0.20f,
+                    slotWidth * 0.6f, slotWidth * 0.6f);
                 int iconIndex = IconIndex(definition != null ? definition.Id : null);
                 if (iconIndex >= 0 && weaponIcons != null && iconIndex < weaponIcons.Length)
                     DrawWeaponIcon(weaponIcons[iconIndex], iconArea, WeaponIconPixels[iconIndex]);
@@ -212,20 +235,14 @@ namespace Spotlight.Battle
                 float remaining = runtime.CooldownRemaining;
                 if (remaining > 0f)
                 {
-                    float fraction = definition != null && definition.CooldownSeconds > 0f
-                        ? Mathf.Clamp01(remaining / definition.CooldownSeconds) : 0f;
-                    DrawTint(new Rect(iconArea.x, iconArea.y + iconArea.height * (1f - fraction),
-                        iconArea.width, iconArea.height * fraction), new Color(0f, 0f, 0f, 0.7f));
                     GUI.Label(iconArea, Mathf.CeilToInt(remaining).ToString(), timerStyle);
                 }
 
-                GUI.Label(new Rect(card.x + 4f, card.y + card.height - 25f, card.width - 8f, 22f),
+                GUI.Label(new Rect(card.x + 4f, card.y + card.height - 33f, card.width - 8f, 30f),
                     definition != null ? definition.DisplayName : "", nameStyle);
-                DrawTint(new Rect(card.x + 3f, card.y + 4f, 23f, 19f),
-                    new Color(0.58f, 0.43f, 0.28f, 0.95f));
-                GUI.Label(new Rect(card.x + 3f, card.y + 3f, 23f, 20f), keys[slot], nameStyle);
+                GUI.Label(new Rect(card.x + 3f, card.y + 3f, 31f, 28f), keys[slot], nameStyle);
                 if (definition != null)
-                    GUI.Label(new Rect(card.x + card.width - 45f, card.y + 3f, 40f, 20f),
+                    GUI.Label(new Rect(card.x + card.width - 60f, card.y + 3f, 55f, 27f),
                         definition.CooldownSeconds.ToString("0") + "s", cooldownStyle);
             }
         }

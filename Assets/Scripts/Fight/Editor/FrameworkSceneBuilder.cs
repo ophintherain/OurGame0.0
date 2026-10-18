@@ -20,6 +20,9 @@ namespace Spotlight.Editor
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
         private const string FirstFightPath = ScenesFolder + "/fight/fight_1.unity";
+        private const string SecondFightPath = ScenesFolder + "/fight/fight_2.unity";
+        private const string ThirdFightPath = ScenesFolder + "/fight/fight_3.unity";
+        private const string TestFightPath = ScenesFolder + "/fight/fight_test.unity";
         private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
         private const string BattleDataFolder = ModulesFolder + "/Battle/Data";
         private const string TrucePath = BattleDataFolder + "/Truce.asset";
@@ -453,9 +456,9 @@ namespace Spotlight.Editor
         private static void ConfigureBuildSettings()
         {
             var scenePaths = new List<string> { BootstrapPath, GameplayPath };
-            if (File.Exists(FirstFightPath))
+            foreach (string fightPath in new[] { FirstFightPath, SecondFightPath, ThirdFightPath, TestFightPath })
             {
-                scenePaths.Add(FirstFightPath);
+                if (File.Exists(fightPath)) scenePaths.Add(fightPath);
             }
             if (File.Exists(SampleScenePath))
             {

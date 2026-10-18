@@ -19,6 +19,7 @@ namespace Spotlight.Battle
         private float bossFlash;
         private Coroutine hitPause;
         private float pauseOriginalScale = 1f;
+        private float lastDamageSoundTime = -100f;
 
         public void Configure(BattleCoordinator coordinator, PlayerBattleController battlePlayer,
             BossController battleBoss, WeaponController weaponController, BattleCameraRig rig)
@@ -107,6 +108,11 @@ namespace Spotlight.Battle
         private void OnPlayerHealthChanged(float previous, float current)
         {
             if (battle == null || !battle.IsBattleActive || current >= previous) return;
+            if (Time.unscaledTime - lastDamageSoundTime > 0.2f)
+            {
+                UISoundPlayer.Play(UISoundCue.ExplorationDamage);
+                lastDamageSoundTime = Time.unscaledTime;
+            }
             playerFlash = 0.16f;
             cameraRig?.RequestImpact(0.12f);
             SpawnBurst(player.transform.position, new Color(1f, 0.3f, 0.3f));
