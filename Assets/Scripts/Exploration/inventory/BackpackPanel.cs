@@ -67,6 +67,7 @@ namespace Spotlight.Exploration
         private InventoryItemKind currentKind = InventoryItemKind.Weapon;
         private Image buttonImage;
         private Sprite defaultButtonIcon;
+        private bool interactionEnabled = true;
 
         private void Awake()
         {
@@ -100,6 +101,9 @@ namespace Spotlight.Exploration
                 }
             }
 
+            NormalizeGridScale(weaponGridRoot);
+            NormalizeGridScale(itemGridRoot);
+
             weaponCells = CollectCells(weaponGridRoot);
             itemCells = CollectCells(itemGridRoot);
 
@@ -121,6 +125,7 @@ namespace Spotlight.Exploration
             }
 
             inventory.Changed += OnInventoryChanged;
+            DisableNonInteractiveRaycasts();
             panelRoot.SetActive(false);
             UpdateButtonIcon(false);
         }
@@ -135,9 +140,19 @@ namespace Spotlight.Exploration
 
         private void Update()
         {
-            if (Input.GetKeyDown(toggleKey))
+            if (interactionEnabled && Input.GetKeyDown(toggleKey))
             {
                 Toggle();
+            }
+        }
+
+        /// <summary>剧情等界面占用时，临时关闭背包的键盘与 HUD 按钮开关。</summary>
+        public void SetInteractionEnabled(bool enabled)
+        {
+            interactionEnabled = enabled;
+            if (btnOpen != null)
+            {
+                btnOpen.interactable = enabled;
             }
         }
 
@@ -229,6 +244,27 @@ namespace Spotlight.Exploration
             }
         }
 
+        /// <summary>
+        /// GridLayoutGroup 按未缩放的矩形排布子物体，容器一旦有缩放，格子会被整体放大并推到面板外。
+        /// 这里把容器缩放还原为 1；需要的视觉大小应改到 Cell Size 或格子自身的 Scale 上。
+        /// </summary>
+        private static void NormalizeGridScale(Transform gridRoot)
+        {
+            Vector3 scale = gridRoot.localScale;
+            if (Mathf.Approximately(scale.x, 1f) &&
+                Mathf.Approximately(scale.y, 1f) &&
+                Mathf.Approximately(scale.z, 1f))
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                $"[Exploration] {gridRoot.name} 的 Scale 是 {scale}，GridLayoutGroup 会按未缩放尺寸排版，导致格子被推到面板外。" +
+                "已在运行时按 1 处理；请把它的 Scale 改回 1，再用 Cell Size 或格子自身的 Scale 调整大小。",
+                gridRoot);
+            gridRoot.localScale = Vector3.one;
+        }
+
         private static InventoryCellView[] CollectCells(Transform gridRoot)
         {
             InventoryCellView[] cells = gridRoot.GetComponentsInChildren<InventoryCellView>(true);
@@ -238,6 +274,25 @@ namespace Spotlight.Exploration
             }
 
             return cells;
+        }
+
+        /// <summary>
+        /// 关掉面板里装饰性图片的 Raycast，避免背景、格子容器、格子底图盖在页签按钮上方，
+        /// 导致背包打开后点不到页签、也点不到被面板遮住的 HUD 按钮。按钮自己的图片保留 Raycast。
+        /// </summary>
+        private void DisableNonInteractiveRaycasts()
+        {
+            Image[] images = panelRoot.GetComponentsInChildren<Image>(true);
+            for (int i = 0; i < images.Length; i++)
+            {
+                Image image = images[i];
+                if (image.GetComponent<Button>() != null || image.GetComponentInParent<Button>(true) != null)
+                {
+                    continue;
+                }
+
+                image.raycastTarget = false;
+            }
         }
     }
 }

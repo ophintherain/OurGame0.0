@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch1_hint_01_rotate
+  m_EditorClassIdentifier: 
+  storyId: ch1_hint_01_rotate
+  chapterTitle: ch1_hint_01_rotate
+  playOnce: 1
+  lockPlayer: 0
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 2
+    speaker: "\u5F15\u5BFC"
+    text: "\uFF08\u8F6C\u52A8\u89C6\u89D2\uFF0C\u73AF\u987E\u56DB\u5468\uFF09"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 

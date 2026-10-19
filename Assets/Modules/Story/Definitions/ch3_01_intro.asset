@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch3_01_intro
+  m_EditorClassIdentifier: 
+  storyId: ch3_01_intro
+  chapterTitle: ch3_01_intro
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u4F60\u6765\u4E86\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1003
+    note: 
+  - kind: 5
+    speaker: 
+    text: 
+    choices:
+    - "\u6211\u6765\u4E86\u3002"
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u9ED1\u5E95\u767D\u5B57\uFF0C\u6587\u5B57\u5C45\u4E2D\uFF0C\u9010\u53E5\u6EDA\u52A8\uFF0C\u6162\u901F\uFF1B"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u6765\u76F4\u9762\u6211\u5427\uFF0C\u96E8\u4E2D\u7684\u8BD7\u8005\uFF0C\u98CE\u66B4\u7684\u97F3\u4E50\u5BB6\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71\uFF08boss3\uFF09"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u2026\u2026\u4E03\u5E74\u8FC7\u53BB\u4E86\uFF0C\u8FD8\u5728\u88C5\u8154\u62FF\u8C03\u5730\u7814\u7A76\u90A3\u4E2A\u94C1\u76AE\u76D2\u5B50\u91CC\u7684\u5267\u76EE\u5417\uFF1F"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: 
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u2026\u2026\u95ED\u5634\u3002\u4F60\u4E0D\u60F3\u76F4\u63A5\u89C1\u5230\u6211\u5417\uFF1F"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1003
+    note: 
+  - kind: 4
+    speaker: "\u8B66\u544A"
+    text: "\u8BF7\u8C28\u614E\u9009\u62E9\uFF01\uFF01\uFF01"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: 1003
+    note: 
+  - kind: 5
+    speaker: 
+    text: 
+    choices:
+    - "\u6765\u5427\u3002"
+    - "\u4F60\u5C31\u8FD9\u4E48\u8FEB\u4E0D\u53CA\u5F85\u8981\u89C1\u5230\u6211\uFF1F"
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u6765\u5427\uFF0C\u6211\u4EEC\u5DF2\u7ECF\u6709\u4E03\u5E74\u6CA1\u89C1\u4E86\uFF0C\u897F\u8499\u3002"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: "\u8854\u63A5\u9009\u9879\uFF0Cboss\u6218\u548C\u89C4\u5219\u602A\u8C08\u540C\u671F\u51FA\u73B0\uFF0C\u53EF\u627E\u6B66\u5668"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u4F60\u5C31\u8FD9\u4E48\u8FEB\u4E0D\u53CA\u5F85\u5730\u60F3\u8981\u89C1\u5230\u6211\uFF1F"
+    choices: []
+    portraitKey: player
+    audioCue: 
+    stageNote: "\u4E3B\u89D2\u7ACB\u7ED8"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u54C8\uFF0C\u90A3\u4F60\u5C31\u53BB\u73A9\u90A3\u4E2A\u89C4\u5219\u6E38\u620F\u5427\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u4E0D\u6562\u76F4\u9762\u7684\u4EBA\u662F\u4F60\uFF0C\u8C03\u67E5\u5458001#master
+      name#\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u4F60\u5C31\u8FD9\u4E48\u5BB3\u6015\u89C1\u5230\u65E7\u53CB\u5417\uFF1F"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u4F60\u4E0D\u662F\u4ED6\u3002\u6211\u4EEC\u5F88\u5C11\u8FD9\u4E48\u5FC3\u5E73\u6C14\u548C\u5730\u8BF4\u8BDD\u3002"
+    choices: []
+    portraitKey: player
+    audioCue: 
+    stageNote: "\u4E3B\u89D2\u7ACB\u7ED8"
+    sceneTag: 1003
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u662F\u554A\u2014\u2014\u961F\u957F\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u7ACB\u7ED8\uFF08\u8F66\u53A2\u4E09boss\uFF09"
+    sceneTag: 1003
+    note: 

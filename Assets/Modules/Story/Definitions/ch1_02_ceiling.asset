@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch1_02_ceiling
+  m_EditorClassIdentifier: 
+  storyId: ch1_02_ceiling
+  chapterTitle: ch1_02_ceiling
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u201D\u8BF7\u6CE8\u89C6\u7740\u6211\uFF0C\u6BCD\u4EB2\u3002\u201C"
+    choices: []
+    portraitKey: firefeather
+    audioCue: 
+    stageNote: "\u6587\u672C\u6846\u653E\u4E0A\u65B9\uFF0C\u5C45\u4E2D\uFF0C\u5F53\u5F15\u5BFC\u8BED/\u89C4\u5219\u602A\u8C08\u7528\uFF1B\n\u8499\u8138\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71\u4EBA\uFF0C\u5F15\u5BFC\u8BED\u3002"
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\u65C1\u767D"
+    text: "\u7A1A\u5AE9\u7684\u58F0\u97F3\u4ECE\u4E0A\u65B9\u4F20\u6765\uFF0C\u4F60\u4E0B\u610F\u8BC6\u671D\u4E0A\u65B9\u770B\u53BB\u3002"
+    choices: []
+    portraitKey: "\u65C1\u767D"
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\u65C1\u767D"
+    text: "\u5782\u540A\u7684\u5C38\u4F53\u6620\u5165\u4F60\u7684\u773C\u5E18\uFF0C\u7070\u9752\u7684\u811A\u8155\u79BB\u4F60\u5982\u6B64\u8FD1\uFF0C\u53EF\u6B64\u524D\u4F60\u5374\u4E00\u65E0\u6240\u89C1\u3002"
+    choices: []
+    portraitKey: "\u65C1\u767D"
+    audioCue: 
+    stageNote: "\u4F4E\u9700\u6C42\uFF0C\u5782\u540A\u7684\u5C38\u4F53\u5F71\u5B50/\u773C\u524D\u7684\u811A"
+    sceneTag: "\u5C38\u4F53"
+    note: 
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\uFF01\uFF01\uFF01"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u6587\u672C\u6846\u653E\u4E0A\u65B9\uFF0C\u5C45\u4E2D\uFF0C\u5F53\u5F15\u5BFC\u8BED/\u89C4\u5219\u602A\u8C08\u7528"
+    sceneTag: 1001
+    note: 
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u8BF7\u4E0D\u8981\u5728\u72EC\u81EA\u4E00\u4EBA\u65F6\uFF0C\u76F4\u89C6\u8F66\u9876\u3002"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u201C\u770B\u770B\u8F66\u9876\u554A\uFF0C\u6BCD\u4EB2\uFF01\u8F66\u9876\u662F\u552F\u4E00\u7684\u771F\u76F8\uFF0C\u552F\u4E00\u7684\u771F\u76F8\uFF01\uFF01\uFF01\u201D"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u5988\u5988......\u4F60\u629B\u5F03\u4E86\u6211\u2026\u2026"
+    choices: []
+    portraitKey: firefeather
+    audioCue: "\u53D7\u51FB\u6263\u8840\u58F0"
+    stageNote: "\u7EA2\u8272\u7279\u6548\u6846\u53D7\u51FB\uFF0C\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71"
+    sceneTag: 1001
+    note: 

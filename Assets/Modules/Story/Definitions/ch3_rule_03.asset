@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch3_rule_03
+  m_EditorClassIdentifier: 
+  storyId: ch3_rule_03
+  chapterTitle: ch3_rule_03
+  playOnce: 1
+  lockPlayer: 0
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u98CE\u4E2D\u7684\u5F71\u5B50\uFF0C\u53BB\u5F80\u4F55\u65B9\u3002"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u5F71\u5B50\u6307\u793A\u4E1C\u5357\u65B9\uFF0C\uFF08\u70B9\u51FB\u4E1C\u5357\u65B9/\u524D\u666F\u5373\u53EF\uFF09"
+    sceneTag: 1003
+    note: "\u20183-3"
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u53A2\u5185\u75F4\u5BA2\uFF0C\u5F52\u9014\u4F55\u5904\u3002"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u4E0D\u91CD\u8981\uFF0C\u63D0\u793A\u7528\u3002"
+    sceneTag: 1003
+    note: 

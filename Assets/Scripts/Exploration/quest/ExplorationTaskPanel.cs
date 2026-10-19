@@ -72,6 +72,7 @@ namespace Spotlight.Exploration
         private TMP_Text secondTaskText;
         private Image buttonImage;
         private Sprite defaultButtonIcon;
+        private bool interactionEnabled = true;
 
         private void Awake()
         {
@@ -130,9 +131,19 @@ namespace Spotlight.Exploration
 
         private void Update()
         {
-            if (Input.GetKeyDown(toggleKey))
+            if (interactionEnabled && Input.GetKeyDown(toggleKey))
             {
                 Toggle();
+            }
+        }
+
+        /// <summary>剧情等界面占用时，临时关闭任务面板的键盘与 HUD 按钮开关。</summary>
+        public void SetInteractionEnabled(bool enabled)
+        {
+            interactionEnabled = enabled;
+            if (btnOpen != null)
+            {
+                btnOpen.interactable = enabled;
             }
         }
 
