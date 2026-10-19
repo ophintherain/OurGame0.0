@@ -106,10 +106,9 @@ namespace Spotlight.Battle
             float portraitSize = Mathf.Clamp(Screen.width * 0.04f, 58f, 72f);
             float gap = 8f;
             float centerGap = 12f;
-            float available = right - left - mapWidth - Mathf.Max(32f, Screen.width * 0.05f)
-                - portraitSize * 2f - gap * 2f - centerGap;
-            float barWidth = Mathf.Min(535f, available * 0.5f);
-            float bossPortraitX = right - (barWidth * 2f + portraitSize * 2f + gap * 2f + centerGap);
+            float bossPortraitX = left + mapWidth + 14f;
+            float available = right - bossPortraitX - portraitSize * 2f - gap * 2f - centerGap;
+            float barWidth = Mathf.Max(0f, available * 0.5f);
             float bossBarX = bossPortraitX + portraitSize + gap;
             float playerPortraitX = bossBarX + barWidth + centerGap;
             float playerBarX = playerPortraitX + portraitSize + gap;

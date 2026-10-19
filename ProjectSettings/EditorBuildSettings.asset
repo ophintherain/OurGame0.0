@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Gameplay.unity
     guid: 4522c48272d21674ab1db56f72500939
   - enabled: 1
+    path: Assets/Scenes/explore/first.unity
+    guid: a96995eaf5aeba74eb89689c16ebae7b
+  - enabled: 1
     path: Assets/Scenes/fight/fight_1.unity
     guid: e30ae3e542ec4711a4f8560e2ef6a557
   - enabled: 1

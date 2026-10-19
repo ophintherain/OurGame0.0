@@ -19,6 +19,7 @@ namespace Spotlight.Editor
         private const string ModulesFolder = "Assets/Modules";
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
+        private const string ExplorationPath = ScenesFolder + "/explore/first.unity";
         private const string FirstFightPath = ScenesFolder + "/fight/fight_1.unity";
         private const string SecondFightPath = ScenesFolder + "/fight/fight_2.unity";
         private const string ThirdFightPath = ScenesFolder + "/fight/fight_3.unity";
@@ -107,7 +108,7 @@ namespace Spotlight.Editor
             GameObject playerObject = CreateSpriteBox("Player", world.transform, new Vector3(0f, -1.1f, 0f),
                 new Vector2(0.8f, 1.4f), new Color(0.2f, 0.62f, 1f, 1f), 0, 10);
             SpriteRenderer playerArtwork = CreateArtwork("PlayerArtwork", playerObject.transform,
-                ArtworkFolder + "/Player/4001.png", playerObject.transform.position,
+                ArtworkFolder + "/Player/4001b.png", playerObject.transform.position,
                 new Vector2(3.2f, 5.2f), 10);
             if (playerArtwork != null)
             {
@@ -164,6 +165,9 @@ namespace Spotlight.Editor
             PlayerBattleController battlePlayer = playerObject.AddComponent<PlayerBattleController>();
             battlePlayer.Configure(arena, playerHealth,
                 new BattlePosition(BattleLane.Corridor, 8));
+            battlePlayer.ConfigureArtwork(
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001b.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001a.png"));
 
             GameObject battleVisualRoot = NewChild(world, "BattleEnvironment");
             CreateArtwork("BattleBackground", battleVisualRoot.transform, ArtworkFolder + "/Background/10011a.png",
@@ -456,6 +460,7 @@ namespace Spotlight.Editor
         private static void ConfigureBuildSettings()
         {
             var scenePaths = new List<string> { BootstrapPath, GameplayPath };
+            if (File.Exists(ExplorationPath)) scenePaths.Add(ExplorationPath);
             foreach (string fightPath in new[] { FirstFightPath, SecondFightPath, ThirdFightPath, TestFightPath })
             {
                 if (File.Exists(fightPath)) scenePaths.Add(fightPath);

@@ -3320,6 +3320,9 @@ MonoBehaviour:
   onTableVisualOffsetY: 2
   backgroundTableVisualOffsetY: 1.5
   proneVisualOffsetY: -0.3
+  idleArtwork: {fileID: 21300000, guid: b78333f510cf4169a037c6f70a1aaf26, type: 3}
+  castingArtwork: {fileID: 21300000, guid: c43677db81994bbb87331d8367b1eeff, type: 3}
+  castingPoseDuration: 0.32
 --- !u!114 &1611900938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4637,7 +4640,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 10
-  m_Sprite: {fileID: 21300000, guid: b08f1852d9c04adebc679ced2e6c7833, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b78333f510cf4169a037c6f70a1aaf26, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

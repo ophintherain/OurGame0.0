@@ -283,6 +283,7 @@ namespace Spotlight.Battle
                 default:
                     return false;
             }
+            player?.PlayCastingPose();
             WeaponUsed?.Invoke(slot, resolution);
             if (weapon.Definition.Skill != WeaponSkill.Mimic)
                 lastUsedSkill = weapon.Definition.Skill;
