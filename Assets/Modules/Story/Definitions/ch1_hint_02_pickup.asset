@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch1_hint_02_pickup
+  m_EditorClassIdentifier: 
+  storyId: ch1_hint_02_pickup
+  chapterTitle: ch1_hint_02_pickup
+  playOnce: 1
+  lockPlayer: 0
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 2
+    speaker: "\u5F15\u5BFC"
+    text: "\uFF08\u70B9\u51FB\u62B1\u8D77\u53EF\u80FD\u7684\u9053\u5177\uFF09"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u5708\u51FA\u684C\u4E0A\u7684\u4E4C\u9E26\u73A9\u5076\uFF0C"
+    sceneTag: 1001
+    note: 

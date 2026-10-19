@@ -26,6 +26,10 @@ namespace Spotlight.Exploration
         private ExplorationInventory inventory;
 
         [SerializeField]
+        [Tooltip("顶部功能提示组件。留空会在场景里自动查找一个 ExplorationHintPanel")]
+        private ExplorationHintPanel hintPanel;
+
+        [SerializeField]
         [Tooltip("可探索点列表。每项填世界坐标和类型；选中本物体后可在 Scene 视图里拖动黄色手柄自由摆放")]
         private List<ExplorationPoint> points = new List<ExplorationPoint>();
 
@@ -71,6 +75,11 @@ namespace Spotlight.Exploration
             if (inventory == null)
             {
                 Debug.LogWarning("[Exploration] 场景里没有 ExplorationInventory，获得物品类型的可探索点不会生效。", this);
+            }
+
+            if (hintPanel == null)
+            {
+                hintPanel = FindObjectOfType<ExplorationHintPanel>();
             }
 
             if (points == null)
@@ -151,6 +160,10 @@ namespace Spotlight.Exploration
                     if (!inventory.Add(point.itemId, point.icon, point.displayName))
                     {
                         Debug.Log($"[Exploration] 物品 {point.itemId} 未加入背包（已拥有或 ID 不合法）。");
+                    }
+                    else if (hintPanel != null && !string.IsNullOrWhiteSpace(point.hintText))
+                    {
+                        hintPanel.Show(point.hintText);
                     }
 
                     break;

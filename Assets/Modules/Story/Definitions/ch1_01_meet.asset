@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch1_01_meet
+  m_EditorClassIdentifier: 
+  storyId: ch1_01_meet
+  chapterTitle: ch1_01_meet
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u597D\u4E45\u4E0D\u89C1\uFF0C\u8C03\u67E5\u5458001#master name#\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u8499\u4F4F\u8138\u7684\u7814\u7A76\u5458\u7ACB\u7ED8\uFF083\u53F7\u602A\uFF09\uFF0C\u906E\u4F4F\u8138\u7684\u7070\u5F71\u4EBA\uFF0C\u5217\u8F66\u6708\u53F0\uFF0C"
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u8FD8\u8BB0\u5F97\u600E\u4E48\u627E\u5230\u6211\u4EEC\u5417\uFF1F"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u9075\u5B88\u89C4\u5219\u3002"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u5BF9\uFF0C\u5C31\u50CF\u662F\u68A6\u4E2D\u7684\u6349\u8FF7\u85CF\uFF0C\u53EA\u8981\u9075\u5B88\u4E86\u6349\u8FF7\u85CF\u7684\u89C4\u5219\uFF0C\u5C31\u4E00\u5B9A\u53EF\u4EE5......\u627E\u5230\u6211\u4EEC\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1001
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u5F88\u9AD8\u5174\u4F60\u5C65\u884C\u4E86\u7EA6\u5B9A\uFF0C\u6211\u5728\u6700\u6DF1\u5904\u2026...\u7B49\u5F85\u7740\u4F60\u3002"
+    choices: []
+    portraitKey: researcher
+    audioCue: 
+    stageNote: "\u7814\u7A76\u5458\u526A\u5F71"
+    sceneTag: 1001
+    note: 

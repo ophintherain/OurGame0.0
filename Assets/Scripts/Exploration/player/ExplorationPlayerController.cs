@@ -46,8 +46,31 @@ namespace Spotlight.Exploration
         [Tooltip("占位方块：当前姿势没有配立绘时显示它，配了就隐藏。留空会自动取 Player 自己身上的 SpriteRenderer")]
         private SpriteRenderer placeholderVisual;
 
+        [SerializeField]
+        [Tooltip("站立 / 上桌移动时循环播放的序列帧，按数组顺序播放；留空则保持原有静态立绘")]
+        private Sprite[] standingMoveFrames;
+
+        [SerializeField]
+        [Tooltip("匍匐移动时循环播放的序列帧，按数组顺序播放；留空则保持原有静态立绘")]
+        private Sprite[] proneMoveFrames;
+
+        [SerializeField, Min(1f)]
+        [Tooltip("移动动画播放速度（帧/秒），数值越大动画越快；8 约为正常步频")]
+        private float moveFramesPerSecond = 8f;
+
+        [SerializeField]
+        [Tooltip("匍匐立绘相对角色的位置偏移（世界单位），用于把匍匐图对齐到地面；默认 0 = 不偏移")]
+        private Vector2 proneVisualOffset;
+
         private GameObject standingVisualInstance;
         private GameObject proneVisualInstance;
+        private SpriteRenderer standingRenderer;
+        private SpriteRenderer proneRenderer;
+        private Sprite standingOriginalSprite;
+        private Sprite proneOriginalSprite;
+        private Vector3 proneOriginalLocalPosition;
+        private int frameIndex;
+        private float frameElapsed;
 
         private Vector3 moveStartPosition;
         private Vector3 targetPosition;
@@ -96,6 +119,13 @@ namespace Spotlight.Exploration
             placeholderVisual ??= GetComponent<SpriteRenderer>();
             standingVisualInstance = ResolveVisual(standingVisual);
             proneVisualInstance = ResolveVisual(proneVisual);
+            standingRenderer = FindRenderer(standingVisualInstance);
+            proneRenderer = FindRenderer(proneVisualInstance);
+            standingOriginalSprite = standingRenderer != null ? standingRenderer.sprite : null;
+            proneOriginalSprite = proneRenderer != null ? proneRenderer.sprite : null;
+            proneOriginalLocalPosition = proneVisualInstance != null
+                ? proneVisualInstance.transform.localPosition
+                : Vector3.zero;
             ApplyPose();
 
             if (placeholderVisual == null && standingVisualInstance == null && proneVisualInstance == null)
@@ -162,8 +192,11 @@ namespace Spotlight.Exploration
                 return false;
             }
 
-            // 上桌状态下移动等于自动下桌并恢复站立
-            SetPosture(ExplorationPosture.Standing);
+            // 上桌状态下移动等于自动下桌并恢复站立；匍匐移动保持匍匐
+            if (Posture == ExplorationPosture.OnTable)
+            {
+                SetPosture(ExplorationPosture.Standing);
+            }
 
             int previous = CurrentColumn;
             CurrentColumn = next;
@@ -172,6 +205,9 @@ namespace Spotlight.Exploration
             moveElapsed = 0f;
             moveDuration = Mathf.Max(0.0001f, map.CellSpacing / Mathf.Max(0.0001f, moveSpeed));
             IsMoving = true;
+            frameIndex = 0;
+            frameElapsed = 0f;
+            ApplyMoveFrame();
 
             MoveStarted?.Invoke(previous, CurrentColumn);
             return true;
@@ -273,11 +309,14 @@ namespace Spotlight.Exploration
             float eased = moveCurve != null && moveCurve.length > 0 ? moveCurve.Evaluate(progress) : progress;
             transform.position = Vector3.Lerp(moveStartPosition, targetPosition, eased);
 
+            AdvanceMoveAnimation(deltaTime);
+
             if (progress >= 1f)
             {
                 transform.position = targetPosition;
                 IsMoving = false;
                 ApplyPendingPosture();
+                ApplyIdleFrame();
                 MoveCompleted?.Invoke(CurrentColumn);
             }
         }
@@ -322,7 +361,81 @@ namespace Spotlight.Exploration
                 placeholderVisual.enabled = isProne ? proneVisualInstance == null : standingVisualInstance == null;
             }
 
+            ApplyVisualOffset(proneVisualInstance, proneOriginalLocalPosition, proneVisualOffset);
+            ApplyIdleFrame();
             ApplyFacing();
+        }
+
+        private static SpriteRenderer FindRenderer(GameObject visual)
+        {
+            return visual != null ? visual.GetComponentInChildren<SpriteRenderer>(true) : null;
+        }
+
+        private static void ApplyVisualOffset(GameObject visual, Vector3 originalLocalPosition, Vector2 offset)
+        {
+            if (visual != null)
+            {
+                visual.transform.localPosition = originalLocalPosition + new Vector3(offset.x, offset.y, 0f);
+            }
+        }
+
+        /// <summary>停下来时显示当前姿势序列帧的第 1 帧；没有序列帧则还原原始立绘。</summary>
+        private void ApplyIdleFrame()
+        {
+            frameIndex = 0;
+            frameElapsed = 0f;
+
+            bool isProne = Posture == ExplorationPosture.Prone;
+            SpriteRenderer renderer = isProne ? proneRenderer : standingRenderer;
+            if (renderer == null)
+            {
+                return;
+            }
+
+            Sprite[] frames = isProne ? proneMoveFrames : standingMoveFrames;
+            renderer.sprite = frames != null && frames.Length > 0 && frames[0] != null
+                ? frames[0]
+                : (isProne ? proneOriginalSprite : standingOriginalSprite);
+        }
+
+        /// <summary>移动中按帧率循环推进序列帧。</summary>
+        private void AdvanceMoveAnimation(float deltaTime)
+        {
+            Sprite[] frames = Posture == ExplorationPosture.Prone ? proneMoveFrames : standingMoveFrames;
+            if (frames == null || frames.Length == 0)
+            {
+                return;
+            }
+
+            frameElapsed += Mathf.Max(0f, deltaTime);
+            float frameDuration = 1f / Mathf.Max(1f, moveFramesPerSecond);
+            int steps = Mathf.FloorToInt(frameElapsed / frameDuration);
+            if (steps <= 0)
+            {
+                return;
+            }
+
+            frameElapsed -= steps * frameDuration;
+            frameIndex = (frameIndex + steps) % frames.Length;
+            ApplyMoveFrame();
+        }
+
+        /// <summary>把当前帧写给当前姿势的立绘。</summary>
+        private void ApplyMoveFrame()
+        {
+            bool isProne = Posture == ExplorationPosture.Prone;
+            SpriteRenderer renderer = isProne ? proneRenderer : standingRenderer;
+            Sprite[] frames = isProne ? proneMoveFrames : standingMoveFrames;
+            if (renderer == null || frames == null || frames.Length == 0)
+            {
+                return;
+            }
+
+            int index = Mathf.Clamp(frameIndex, 0, frames.Length - 1);
+            if (frames[index] != null)
+            {
+                renderer.sprite = frames[index];
+            }
         }
 
         /// <summary>设置朝向：+1 面向右，-1 面向左。朝向变化时立即刷新表现。</summary>

@@ -36,6 +36,9 @@ namespace Spotlight.Exploration
         [Tooltip("物品在背包里显示的名称，仅 Item 类型使用")]
         public string displayName;
 
+        [Tooltip("获得该物品后在屏幕顶部弹出的功能提示文本，留空则不弹。仅 Item 类型使用，建议 40 字以内")]
+        public string hintText;
+
         [Tooltip("剧情标识，仅 Story 类型使用。点击后会通过 StoryTriggered 事件发出这个字符串")]
         public string storyId;
     }

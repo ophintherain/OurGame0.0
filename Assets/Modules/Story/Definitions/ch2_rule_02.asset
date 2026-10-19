@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch2_rule_02
+  m_EditorClassIdentifier: 
+  storyId: ch2_rule_02
+  chapterTitle: ch2_rule_02
+  playOnce: 1
+  lockPlayer: 0
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u8FDC\u79BB\u5B64\u72EC\u7684\u4EBA\u5076\u3002"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u4E0D\u8981\u9760\u8FD1\u5355\u4E00\u7684\u4EBA\u5076"
+    sceneTag: 1002
+    note: "\u20182-2"
+  - kind: 3
+    speaker: "\u5E7F\u64AD"
+    text: "\u8BF7\u62FE\u8D77\u4EBA\u5076\u3002"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u6293\u8D77\u4E24\u4E2A\u4EBA\u5076\u5C31\u884C"
+    sceneTag: 1002
+    note: 

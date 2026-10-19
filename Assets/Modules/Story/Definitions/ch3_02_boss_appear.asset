@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch3_02_boss_appear
+  m_EditorClassIdentifier: 
+  storyId: ch3_02_boss_appear
+  chapterTitle: ch3_02_boss_appear
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\u65C1\u767D"
+    text: "\u8BD5\u5242\u5C06\u7535\u89C6\u673A\u4FB5\u8680\u6B86\u5C3D\uFF0C\u7EFF\u8272\u7684\u6EB6\u6DB2\u6C47\u843D\u5730\u8868\uFF0C\u53C8\u8FC5\u901F\u5F62\u6210\u4EBA\u5F62\u3002"
+    choices: []
+    portraitKey: "\u65C1\u767D"
+    audioCue: 
+    stageNote: 
+    sceneTag: 1003
+    note: 
