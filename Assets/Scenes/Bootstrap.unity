@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 459959944}
   - component: {fileID: 459959943}
   - component: {fileID: 459959942}
+  - component: {fileID: 459959947}
   m_Layer: 0
   m_Name: PersistentRoot
   m_TagString: Untagged
@@ -154,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ae54c2185d329458a459de2796152f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoStart: 1
+  autoStart: 0
   runSession: {fileID: 459959945}
   sceneLoader: {fileID: 459959944}
   gameFlowController: {fileID: 459959943}
@@ -211,6 +212,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &459959947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459959941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20dbd1807e774da1bb0e9b548aa720d4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  background: {fileID: 21300000, guid: 6ad89fd6028c49638f11387edb75ca88, type: 3}
+  startLabel: {fileID: 21300000, guid: 78e00d15723f41ffa415f14c2b563e20, type: 3}
+  continueLabel: {fileID: 21300000, guid: 8a79c532484d488e89ef72f1029b5d4c, type: 3}
+  exitLabel: {fileID: 21300000, guid: f5b6374dd0f34cac91b91e61e5d617b9, type: 3}
+  selectionArrow: {fileID: 21300000, guid: 9c495ca13b3c4a5db1da81c5c12c2ac9, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

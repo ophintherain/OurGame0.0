@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Spotlight;
 using Spotlight.Battle;
+using Spotlight.Shared;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -80,9 +81,16 @@ namespace Spotlight.Editor
             SceneLoader loader = root.AddComponent<SceneLoader>();
             GameFlowController flow = root.AddComponent<GameFlowController>();
             GameBootstrap bootstrap = root.AddComponent<GameBootstrap>();
+            StartMenuController menu = root.AddComponent<StartMenuController>();
+            menu.Configure(
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start01.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start02.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start03.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start04.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start05.png"));
 
             flow.Initialize(session, loader);
-            bootstrap.Configure(session, loader, flow, true);
+            bootstrap.Configure(session, loader, flow, false);
             EditorSceneManager.SaveScene(scene, BootstrapPath);
         }
 
