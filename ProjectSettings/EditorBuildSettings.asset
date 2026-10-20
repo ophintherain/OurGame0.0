@@ -30,6 +30,9 @@ EditorBuildSettings:
     path: Assets/Scenes/fight/fight_3.unity
     guid: 6f29d89c02cd469e808f20fa46a8b69f
   - enabled: 1
+    path: Assets/Scenes/explore/final.unity
+    guid: f8a9123456789abcdef0123456789012
+  - enabled: 1
     path: Assets/Scenes/ending.unity
     guid: d2f3c9253d8041a4994a0889a9a53e83
   - enabled: 1

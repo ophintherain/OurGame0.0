@@ -27,6 +27,7 @@ public static class EndingSceneBuilder
             "Assets/Scenes/explore/first.unity", "Assets/Scenes/fight/fight_1.unity",
             "Assets/Scenes/explore/second.unity", "Assets/Scenes/fight/fight_2.unity",
             "Assets/Scenes/explore/third.unity", "Assets/Scenes/fight/fight_3.unity",
+            "Assets/Scenes/explore/final.unity",
             "Assets/Scenes/ending.unity", "Assets/Scenes/Gameplay.unity",
             "Assets/Scenes/fight/fight_test.unity", "Assets/Scenes/SampleScene.unity"
         };
