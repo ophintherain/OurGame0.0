@@ -24,7 +24,7 @@ MonoBehaviour:
     choices: []
     portraitKey: 
     audioCue: 
-    stageNote: 
+    stageNote: "\u63D0\u793A"
     sceneTag: 1003
     note: "\u20183-5"
   - kind: 3

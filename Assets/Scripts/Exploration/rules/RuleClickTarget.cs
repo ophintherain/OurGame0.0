@@ -22,6 +22,14 @@ namespace Spotlight.Exploration
         [Tooltip("点击矩形相对物体位置的偏移（世界单位）。物体不在矩形中心时用它微调")]
         private Vector2 offset;
 
+        [SerializeField]
+        [Tooltip("勾选后不使用世界坐标，而是判断鼠标是否在屏幕归一化区域内。适合“点击屏幕右下角”这类规则")]
+        private bool screenSpace;
+
+        [SerializeField]
+        [Tooltip("屏幕归一化点击区域，x/y/宽/高都是 0~1。默认 x=0.70、y=0、宽=0.30、高=0.30，即右下角。仅 screenSpace 勾选时生效")]
+        private Rect screenRect = new Rect(0.70f, 0f, 0.30f, 0.30f);
+
         /// <summary>目标的 key。</summary>
         public string Key => key;
 
@@ -35,26 +43,41 @@ namespace Spotlight.Exploration
                 return;
             }
 
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            // 屏幕空间点击通常落在对话 / 广播 UI 上，不能被 UI 的 Raycast 拦截
+            if (!screenSpace && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             {
                 return;
             }
 
-            Camera worldCamera = Camera.main;
-            if (worldCamera == null)
+            if (screenSpace)
             {
-                return;
+                Vector2 normalized = new Vector2(
+                    Input.mousePosition.x / Mathf.Max(1f, Screen.width),
+                    Input.mousePosition.y / Mathf.Max(1f, Screen.height));
+
+                if (!screenRect.Contains(normalized))
+                {
+                    return;
+                }
             }
-
-            Vector3 world = worldCamera.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 center = (Vector2)transform.position + offset;
-            float halfWidth = Mathf.Abs(size.x) * 0.5f;
-            float halfHeight = Mathf.Abs(size.y) * 0.5f;
-
-            if (Mathf.Abs(world.x - center.x) > halfWidth ||
-                Mathf.Abs(world.y - center.y) > halfHeight)
+            else
             {
-                return;
+                Camera worldCamera = Camera.main;
+                if (worldCamera == null)
+                {
+                    return;
+                }
+
+                Vector3 world = worldCamera.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 center = (Vector2)transform.position + offset;
+                float halfWidth = Mathf.Abs(size.x) * 0.5f;
+                float halfHeight = Mathf.Abs(size.y) * 0.5f;
+
+                if (Mathf.Abs(world.x - center.x) > halfWidth ||
+                    Mathf.Abs(world.y - center.y) > halfHeight)
+                {
+                    return;
+                }
             }
 
             if (string.IsNullOrWhiteSpace(key))
@@ -68,6 +91,11 @@ namespace Spotlight.Exploration
 
         private void OnDrawGizmos()
         {
+            if (screenSpace)
+            {
+                return;
+            }
+
             Vector3 center = (Vector2)transform.position + offset;
             Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.9f);
             Gizmos.DrawWireCube(center, new Vector3(Mathf.Abs(size.x), Mathf.Abs(size.y), 0f));

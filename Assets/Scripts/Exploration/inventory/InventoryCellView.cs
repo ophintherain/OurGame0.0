@@ -18,6 +18,9 @@ namespace Spotlight.Exploration
 
         private InventoryEntry entry;
 
+        /// <summary>左键点击格子（参数为当前条目）。用于再次展示功能说明。</summary>
+        public event Action<InventoryEntry> LeftClicked;
+
         /// <summary>右键点击格子（参数为当前条目）。左键不派发。</summary>
         public event Action<InventoryEntry> RightClicked;
 
@@ -89,12 +92,19 @@ namespace Spotlight.Exploration
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Right || entry == null)
+            if (entry == null)
             {
                 return;
             }
 
-            RightClicked?.Invoke(entry);
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                LeftClicked?.Invoke(entry);
+            }
+            else if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                RightClicked?.Invoke(entry);
+            }
         }
     }
 }

@@ -20,8 +20,11 @@ namespace Spotlight.Exploration
         [Tooltip("该交互点在世界里显示的图片立绘。留空时用格子大小的占位框代替，两种类型都适用")]
         public Sprite visual;
 
+        [Tooltip("场景里已经摆好的立绘物体。填了就直接用它的 SpriteRenderer，编辑器中可见、可直接调大小；留空则运行时自动生成 Point_x")]
+        public GameObject visualObject;
+
         [Range(0.01f, 10f)]
-        [Tooltip("交互点立绘 / 占位框的等比缩放倍数，1 = 原始大小。点击范围和显示大小一起缩放")]
+        [Tooltip("交互点立绘 / 占位框的等比缩放倍数，1 = 原始大小。点击范围和显示大小一起缩放。仅 visualObject 为空时生效")]
         public float visualScale = 1f;
 
         [Tooltip("自定义点击矩形的宽高（世界单位），可分别调整。两项都填 > 0 时按这个矩形判定，不再跟随立绘；留 0 的轴沿用立绘 / 地图格宽。不改变立绘本身的显示大小")]

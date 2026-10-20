@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eddbffdc9784803b6dc55de4313802b, type: 3}
+  m_Name: RuleHorrorSet_Ch2
+  m_EditorClassIdentifier: 
+  rules:
+  - storyId: ch2_rule_02
+    title: 2-2
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions:
+      - type: 1
+        zones:
+        - minX: -4.87
+          maxX: -2.93
+        - minX: 2.89
+          maxX: 4.83
+        posture: 0
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 2
+      damagePerTick: 3
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 0
+    - combine: 0
+      conditions:
+      - type: 4
+        zones: []
+        posture: 0
+        itemId: 2002
+      - type: 4
+        zones: []
+        posture: 0
+        itemId: 2003
+      graceSeconds: 4
+      requiredHoldSeconds: 1
+      damagePerTick: 3
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 0
+  - storyId: ch2_rule_03
+    title: 2-3
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions:
+      - type: 7
+        zones: []
+        posture: 0
+        itemId: 0
+        range: 2
+        targetKey: PatrolDoll
+      graceSeconds: 4
+      requiredHoldSeconds: 3
+      damagePerTick: 3
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 0
+    - combine: 0
+      conditions:
+      - type: 8
+        zones: []
+        posture: 0
+        itemId: 0
+        range: 3
+        targetKey: PatrolDoll
+      graceSeconds: 4
+      requiredHoldSeconds: 4
+      damagePerTick: 3
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 0
+  - storyId: ch2_rule_04
+    title: 2-4
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions: []
+      graceSeconds: 4
+      requiredHoldSeconds: 0
+      damagePerTick: 3
+      completionClickKey: Window
+      forbiddenClickKey: 
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 2004
+    - combine: 0
+      conditions: []
+      graceSeconds: 4
+      requiredHoldSeconds: 3
+      damagePerTick: 3
+      completionClickKey: 
+      forbiddenClickKey: Window
+      forbiddenClickDamage: 3
+      action: 0
+      soundCueKey: 
+      completionClickRequiredItemId: 0

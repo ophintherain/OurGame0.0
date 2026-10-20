@@ -18,7 +18,8 @@ namespace Spotlight.Exploration
         public event Action Changed;
 
         /// <summary>添加一件物品。ID 非法或已拥有时返回 false。</summary>
-        public bool Add(int itemId, Sprite icon = null, string displayName = null)
+        public bool Add(int itemId, Sprite icon = null, string displayName = null,
+            string description = null)
         {
             if (itemId < 1000 || itemId > 2999)
             {
@@ -33,8 +34,12 @@ namespace Spotlight.Exploration
             }
 
             InventoryItemKind kind = itemId < 2000 ? InventoryItemKind.Weapon : InventoryItemKind.Item;
-            entries.Add(new InventoryEntry(itemId, kind, icon, displayName));
-            if (kind == InventoryItemKind.Weapon) RunProgress.AddWeapon(itemId, icon, displayName);
+            entries.Add(new InventoryEntry(itemId, kind, icon, displayName, description));
+            if (kind == InventoryItemKind.Weapon)
+            {
+                RunProgress.AddWeapon(itemId, icon, displayName);
+            }
+
             Changed?.Invoke();
             return true;
         }

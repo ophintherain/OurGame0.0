@@ -84,6 +84,10 @@ namespace Spotlight.Exploration
         [Tooltip("播放背包开关音效的 AudioSource。留空会自动取同一个物体上的组件，没有则自动添加；一般不需要手动拖")]
         private AudioSource soundSource;
 
+        [SerializeField]
+        [Tooltip("顶部功能提示组件。左键背包格子时用它再次显示物品功能说明；留空会自动在场景里查找")]
+        private ExplorationHintPanel hintPanel;
+
         /// <summary>面板是否处于打开状态。</summary>
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
 
@@ -143,6 +147,11 @@ namespace Spotlight.Exploration
 
             soundSource.playOnAwake = false;
             soundSource.spatialBlend = 0f;
+
+            if (hintPanel == null)
+            {
+                hintPanel = FindObjectOfType<ExplorationHintPanel>();
+            }
 
             NormalizeGridScale(weaponGridRoot);
             NormalizeGridScale(itemGridRoot);
@@ -321,6 +330,7 @@ namespace Spotlight.Exploration
             {
                 if (cells[index] != null)
                 {
+                    cells[index].LeftClicked += OnCellLeftClicked;
                     cells[index].RightClicked += OnCellRightClicked;
                 }
             }
@@ -337,9 +347,21 @@ namespace Spotlight.Exploration
             {
                 if (cells[index] != null)
                 {
+                    cells[index].LeftClicked -= OnCellLeftClicked;
                     cells[index].RightClicked -= OnCellRightClicked;
                 }
             }
+        }
+
+        /// <summary>左键格子：再次展示该物品/武器收集时填写的功能说明。</summary>
+        private void OnCellLeftClicked(InventoryEntry entry)
+        {
+            if (entry == null || hintPanel == null || string.IsNullOrWhiteSpace(entry.Description))
+            {
+                return;
+            }
+
+            hintPanel.Show(entry.Description);
         }
 
         /// <summary>右键格子：物品类（2000~2999）从背包放下；武器不可放。</summary>
@@ -372,7 +394,14 @@ namespace Spotlight.Exploration
             renderer.sortingOrder = dropSortingOrder;
 
             DroppedItemPickup pickup = dropped.AddComponent<DroppedItemPickup>();
-            pickup.Configure(inventory, entry.Id, entry.Icon, entry.DisplayName, dropVisualHeight);
+            pickup.Configure(inventory, entry.Id, entry.Icon, entry.DisplayName, entry.Description,
+                dropVisualHeight);
+
+            // 人偶丢到地上后仍然可以靠近按 F 操纵
+            if (ExplorationDollOperable.IsDollItem(entry.Id))
+            {
+                dropped.AddComponent<ExplorationDollOperable>();
+            }
         }
 
         /// <summary>

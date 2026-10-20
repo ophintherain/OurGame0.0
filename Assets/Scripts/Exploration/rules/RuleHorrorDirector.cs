@@ -28,7 +28,7 @@ namespace Spotlight.Exploration
         private ExplorationInventory inventory;
 
         [SerializeField]
-        [Tooltip("必填。本场景的规则集资产（第一车厢 6 组规则）")]
+        [Tooltip("必填。本场景的规则集资产，每个车厢一份（第一车厢 6 组，第二车厢 3 组，第三车厢 4 组）")]
         private RuleHorrorSet ruleSet;
 
         [SerializeField]
@@ -36,7 +36,7 @@ namespace Spotlight.Exploration
         private RuleDarkMask darkMask;
 
         [SerializeField]
-        [Tooltip("可选的 Boss 占位物。1-6 第二段开始时激活，规则完成时关闭；留空时只用右侧火区做判定")]
+        [Tooltip("可选的 Boss 占位物。规则动作 SpawnBoss 时激活，规则完成 / 中止时关闭；第二车厢不需要，可留空")]
         private GameObject bossObject;
 
         [SerializeField, Min(0f)]
@@ -48,7 +48,7 @@ namespace Spotlight.Exploration
         private float intervalSeconds = 20f;
 
         [SerializeField, Min(0.1f)]
-        [Tooltip("违规时每隔多少秒结算一次伤害。实际每次扣血 = 该段的每秒伤害 × 该间隔；血条也会按这个频率闪烁")]
+        [Tooltip("违规时每隔多少秒结算一次伤害。每次扣血量由每段的 damagePerTick 决定")]
         private float damageTickSeconds = 1f;
 
         [SerializeField]
@@ -76,6 +76,7 @@ namespace Spotlight.Exploration
         private float holdTimer;
         private float damageTimer;
         private bool waitingItemLogged;
+        private bool ruleSoundStarted;
         private Vector3 lastClickPosition;
         private bool hasLastClickPosition;
         private readonly HashSet<string> completedIds = new HashSet<string>();
@@ -125,14 +126,14 @@ namespace Spotlight.Exploration
             return null;
         }
 
-        /// <summary>设置某组规则两段的每秒伤害（两段都改成同一个值）。</summary>
-        public bool SetDamagePerSecond(string storyId, float value)
+        /// <summary>设置某组规则两段「每次结算扣多少血」（两段都改成同一个值）。</summary>
+        public bool SetDamagePerTick(string storyId, float amountPerTick)
         {
-            return SetDamagePerSecond(storyId, -1, value);
+            return SetDamagePerTick(storyId, -1, amountPerTick);
         }
 
-        /// <summary>设置某组规则指定段的每秒伤害；stageIndex = -1 表示两段都改。</summary>
-        public bool SetDamagePerSecond(string storyId, int stageIndex, float value)
+        /// <summary>设置某组规则指定段「每次结算扣多少血」；stageIndex = -1 表示两段都改。</summary>
+        public bool SetDamagePerTick(string storyId, int stageIndex, float amountPerTick)
         {
             RuleHorrorRule rule = GetRule(storyId);
             if (rule == null || rule.stages == null)
@@ -140,7 +141,7 @@ namespace Spotlight.Exploration
                 return false;
             }
 
-            float damage = Mathf.Max(0f, value);
+            float damage = Mathf.Max(0f, amountPerTick);
             for (int index = 0; index < rule.stages.Length; index++)
             {
                 if (rule.stages[index] == null)
@@ -150,15 +151,15 @@ namespace Spotlight.Exploration
 
                 if (stageIndex < 0 || index == stageIndex)
                 {
-                    rule.stages[index].damagePerSecond = damage;
+                    rule.stages[index].damagePerTick = damage;
                 }
             }
 
             return true;
         }
 
-        /// <summary>读取某组规则指定段的每秒伤害；找不到返回 0。</summary>
-        public float GetDamagePerSecond(string storyId, int stageIndex)
+        /// <summary>读取某组规则指定段每次结算扣多少血；找不到返回 0。</summary>
+        public float GetDamagePerTick(string storyId, int stageIndex)
         {
             RuleHorrorRule rule = GetRule(storyId);
             if (rule == null || rule.stages == null ||
@@ -168,26 +169,7 @@ namespace Spotlight.Exploration
                 return 0f;
             }
 
-            return rule.stages[stageIndex].damagePerSecond;
-        }
-
-        /// <summary>设置某组规则两段「每次结算扣多少血」，内部换算成每秒伤害。</summary>
-        public bool SetDamagePerTick(string storyId, float amountPerTick)
-        {
-            return SetDamagePerTick(storyId, -1, amountPerTick);
-        }
-
-        /// <summary>设置某组规则指定段「每次结算扣多少血」；stageIndex = -1 表示两段都改。</summary>
-        public bool SetDamagePerTick(string storyId, int stageIndex, float amountPerTick)
-        {
-            float perSecond = Mathf.Max(0f, amountPerTick) / Mathf.Max(0.1f, damageTickSeconds);
-            return SetDamagePerSecond(storyId, stageIndex, perSecond);
-        }
-
-        /// <summary>读取某组规则指定段每次结算实际扣多少血；找不到返回 0。</summary>
-        public float GetDamagePerTick(string storyId, int stageIndex)
-        {
-            return GetDamagePerSecond(storyId, stageIndex) * damageTickSeconds;
+            return rule.stages[stageIndex].damagePerTick;
         }
 
         private void Awake()
@@ -252,8 +234,15 @@ namespace Spotlight.Exploration
 
         private void Update()
         {
-            if (!autoStart || health.IsDead)
+            if (!autoStart)
             {
+                return;
+            }
+
+            if (health.IsDead)
+            {
+                // 死亡后不再推进规则，同时停掉本规则开的环境音，避免水声残留
+                StopRuleSound();
                 return;
             }
 
@@ -443,6 +432,7 @@ namespace Spotlight.Exploration
             damageTimer = 0f;
             hasLastClickPosition = false;
             lastClickPosition = Vector3.zero;
+            ruleSoundStarted = false;
 
             storyDirector.SetManualAdvanceEnabled(false);
 
@@ -522,7 +512,32 @@ namespace Spotlight.Exploration
                     }
 
                     break;
+
+                case RuleStageAction.PlayRuleSound:
+                    if (currentStage != null && !string.IsNullOrWhiteSpace(currentStage.soundCueKey) &&
+                        storyDirector.PlayCue(currentStage.soundCueKey))
+                    {
+                        ruleSoundStarted = true;
+                    }
+
+                    break;
+
+                case RuleStageAction.StopRuleSound:
+                    storyDirector.StopAmbientCue();
+                    ruleSoundStarted = false;
+                    break;
             }
+        }
+
+        private void StopRuleSound()
+        {
+            if (!ruleSoundStarted || storyDirector == null)
+            {
+                return;
+            }
+
+            storyDirector.StopAmbientCue();
+            ruleSoundStarted = false;
         }
 
         private void UpdateActiveStage(float deltaTime)
@@ -564,7 +579,7 @@ namespace Spotlight.Exploration
 
         private void TickDamage(float deltaTime)
         {
-            if (currentStage == null || currentStage.damagePerSecond <= 0f)
+            if (currentStage == null || currentStage.damagePerTick <= 0f)
             {
                 return;
             }
@@ -575,7 +590,7 @@ namespace Spotlight.Exploration
             {
                 damageTimer -= damageTickSeconds;
 
-                health.ApplyDamage(currentStage.damagePerSecond * damageTickSeconds);
+                health.ApplyDamage(currentStage.damagePerTick);
                 PlayDamageCue();
 
                 if (health.IsDead)
@@ -614,6 +629,7 @@ namespace Spotlight.Exploration
 
             storyDirector.SetManualAdvanceEnabled(true);
             darkMask?.SetDark(false);
+            StopRuleSound();
 
             if (bossObject != null)
             {
@@ -646,6 +662,7 @@ namespace Spotlight.Exploration
 
             storyDirector.SetManualAdvanceEnabled(true);
             darkMask?.SetDark(false);
+            StopRuleSound();
 
             if (bossObject != null)
             {
@@ -687,6 +704,16 @@ namespace Spotlight.Exploration
             if (currentStage.HasCompletionClick &&
                 string.Equals(key, currentStage.completionClickKey, StringComparison.Ordinal))
             {
+                // 例如必须拿着长杆才能拉开窗帘；空手点目标按违规处理
+                if (currentStage.completionClickRequiredItemId > 0 &&
+                    (inventory == null || !inventory.Contains(currentStage.completionClickRequiredItemId)))
+                {
+                    holdTimer = 0f;
+                    health.ApplyDamage(currentStage.forbiddenClickDamage);
+                    PlayDamageCue();
+                    return;
+                }
+
                 lastClickPosition = worldPosition;
                 hasLastClickPosition = true;
                 CompleteStage();

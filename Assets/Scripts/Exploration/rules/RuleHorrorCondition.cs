@@ -25,7 +25,19 @@ namespace Spotlight.Exploration
         NotHasItem,
 
         /// <summary>与 Boss 的水平距离必须超过 range。</summary>
-        OutOfBossRange
+        OutOfBossRange,
+
+        /// <summary>与被追踪目标的水平距离必须不超过 range。</summary>
+        NearTarget,
+
+        /// <summary>与被追踪目标的水平距离必须超过 range。</summary>
+        OutOfTargetRange,
+
+        /// <summary>被追踪目标的整数状态必须不小于 stateValue。</summary>
+        TargetValueAtLeast,
+
+        /// <summary>被追踪目标的整数状态必须不大于 stateValue。</summary>
+        TargetValueAtMost
     }
 
     /// <summary>
@@ -34,7 +46,7 @@ namespace Spotlight.Exploration
     [Serializable]
     public sealed class RuleHorrorCondition
     {
-        [Tooltip("条件类型：InZones=必须在区域内；OutZones=必须在区域外；Posture=姿势；NotMoving=不能移动；HasItem=背包拥有物品；NotHasItem=背包没有物品")]
+        [Tooltip("条件类型：InZones=必须在区域内；OutZones=必须在区域外；Posture=姿势；NotMoving=不能移动；HasItem=背包拥有物品；NotHasItem=背包没有物品；OutOfBossRange=Boss 距离；NearTarget=靠近被追踪目标；OutOfTargetRange=远离被追踪目标；TargetValueAtLeast=状态值不小于阈值；TargetValueAtMost=状态值不大于阈值")]
         public RuleConditionType type = RuleConditionType.InZones;
 
         [Tooltip("世界 X 区域列表，仅 InZones / OutZones 使用。InZones 留空表示永远不满足，OutZones 留空表示永远满足")]
@@ -47,8 +59,14 @@ namespace Spotlight.Exploration
         public int itemId;
 
         [Min(0f)]
-        [Tooltip("与 Boss 的安全水平距离（世界单位），仅 OutOfBossRange 使用。玩家与 Boss 的 X 距离大于该值才算远离")]
+        [Tooltip("与 Boss 或追踪目标的安全水平距离（世界单位），仅 OutOfBossRange / NearTarget / OutOfTargetRange 使用")]
         public float range = 3f;
+
+        [Tooltip("被追踪目标的 key，仅 NearTarget / OutOfTargetRange / TargetValueAtLeast / TargetValueAtMost 使用。对应场景里 RuleTrackedTarget 或 RuleStateTarget 上填的 key")]
+        public string targetKey;
+
+        [Tooltip("状态阈值，仅 TargetValueAtLeast / TargetValueAtMost 使用。整数状态与它比较")]
+        public int stateValue;
 
         /// <summary>当前状态下这条条件是否满足。</summary>
         public bool IsSatisfied(Vector3 playerPosition, ExplorationPosture currentPosture,
@@ -103,6 +121,22 @@ namespace Spotlight.Exploration
 
                 case RuleConditionType.OutOfBossRange:
                     return !hasBoss || Mathf.Abs(playerPosition.x - bossPosition.x) > range;
+
+                case RuleConditionType.NearTarget:
+                    return RuleTrackedTarget.TryGetPosition(targetKey, out float nearX) &&
+                           Mathf.Abs(playerPosition.x - nearX) <= range;
+
+                case RuleConditionType.OutOfTargetRange:
+                    return !RuleTrackedTarget.TryGetPosition(targetKey, out float farX) ||
+                           Mathf.Abs(playerPosition.x - farX) > range;
+
+                case RuleConditionType.TargetValueAtLeast:
+                    return RuleStateTarget.TryGetValue(targetKey, out int minValue) &&
+                           minValue >= stateValue;
+
+                case RuleConditionType.TargetValueAtMost:
+                    return !RuleStateTarget.TryGetValue(targetKey, out int maxValue) ||
+                           maxValue <= stateValue;
 
                 default:
                     return true;
