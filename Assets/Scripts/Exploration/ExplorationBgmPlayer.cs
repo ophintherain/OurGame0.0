@@ -29,6 +29,26 @@ namespace Spotlight.Exploration
         private AudioSource source;
         private Coroutine fade;
 
+        /// <summary>当前背景音乐音量。</summary>
+        public float CurrentVolume => volume;
+
+        /// <summary>运行时修改音量（例如电视切换档位）；会中断淡入并立即生效。</summary>
+        public void SetVolume(float value)
+        {
+            if (fade != null)
+            {
+                StopCoroutine(fade);
+                fade = null;
+            }
+
+            volume = Mathf.Clamp01(value);
+
+            if (source != null)
+            {
+                source.volume = volume;
+            }
+        }
+
         private void Awake()
         {
             if (clip == null)

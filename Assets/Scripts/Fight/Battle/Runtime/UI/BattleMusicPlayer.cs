@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace Spotlight.Battle
 {
-    // Plays the carriage loop while exploring/choosing weapons and the boss track in battle.
+    // Keeps exploration silent while playing menu, loadout, boss, and ending music.
     public sealed class BattleMusicPlayer : MonoBehaviour
     {
         private const float MusicVolume = 0.45f;
@@ -49,6 +49,17 @@ namespace Spotlight.Battle
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             UnsubscribeBattle();
+            if (scene.name == "Bootstrap" || scene.name == "ending")
+            {
+                Play("carriage_1_loop");
+                return;
+            }
+            if (scene.name == "zero" || scene.name == "first" || scene.name == "second" ||
+                scene.name == "third")
+            {
+                StopMusic();
+                return;
+            }
             if (scene.name != "Gameplay" && !scene.path.StartsWith("Assets/Scenes/fight/"))
             {
                 StopMusic();

@@ -1,6 +1,11 @@
 Shader "Spotlight/SceneTransition"
 {
-    Properties { _Progress ("Progress", Range(0, 1)) = 0; _Center ("Center", Vector) = (0.5, 0.5, 0, 0) }
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _Progress ("Progress", Range(0, 1)) = 0
+        _Center ("Center", Vector) = (0.5, 0.5, 0, 0)
+    }
     SubShader
     {
         Tags { "Queue"="Overlay" "RenderType"="Transparent" }

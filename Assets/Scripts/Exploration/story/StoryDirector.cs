@@ -279,6 +279,14 @@ namespace Spotlight.Exploration
         }
 
         /// <summary>
+        /// 立即停止当前环境音。供规则怪谈等剧情外系统使用，避免依赖音效集里的「停止」key。
+        /// </summary>
+        public void StopAmbientCue()
+        {
+            StopAmbient();
+        }
+
+        /// <summary>
         /// 按 StoryAudioSet 的 key 播放一次音效，复用现有音源池与音量配置。
         /// 供规则怪谈的扣血音效等剧情外反馈使用。
         /// </summary>

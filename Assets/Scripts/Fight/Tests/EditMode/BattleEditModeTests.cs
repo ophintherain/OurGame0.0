@@ -109,11 +109,13 @@ namespace Spotlight.Tests.EditMode
             renderer.sortingOrder = 10;
             CombatHealth health = playerObject.AddComponent<CombatHealth>();
             PlayerBattleController player = playerObject.AddComponent<PlayerBattleController>();
-            player.Configure(arena, health, new BattlePosition(BattleLane.Foreground, 6));
+            player.Configure(arena, health, new BattlePosition(BattleLane.Corridor, 6));
             player.BeginBattle();
 
             Assert.That(player.TryMoveHorizontal(-1), Is.True);
             Assert.That(player.Position.Column, Is.EqualTo(5));
+            Assert.That(player.TryChangeLane(-1), Is.True);
+            Assert.That(player.TryMoveHorizontal(-1), Is.False);
             float tableY = arena.GetWorldPosition(player.Position).y;
             Assert.That(player.TrySetPosture(PlayerPosture.OnTable), Is.True);
             Assert.That(playerObject.transform.position.y, Is.GreaterThan(tableY));

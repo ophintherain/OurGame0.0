@@ -21,6 +21,10 @@ namespace Spotlight.Editor
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
         private const string ExplorationPath = ScenesFolder + "/explore/first.unity";
+        private const string ProloguePath = ScenesFolder + "/explore/zero.unity";
+        private const string SecondExplorationPath = ScenesFolder + "/explore/second.unity";
+        private const string ThirdExplorationPath = ScenesFolder + "/explore/third.unity";
+        private const string EndingPath = ScenesFolder + "/ending.unity";
         private const string FirstFightPath = ScenesFolder + "/fight/fight_1.unity";
         private const string SecondFightPath = ScenesFolder + "/fight/fight_2.unity";
         private const string ThirdFightPath = ScenesFolder + "/fight/fight_3.unity";
@@ -467,12 +471,11 @@ namespace Spotlight.Editor
 
         private static void ConfigureBuildSettings()
         {
-            var scenePaths = new List<string> { BootstrapPath, GameplayPath };
-            if (File.Exists(ExplorationPath)) scenePaths.Add(ExplorationPath);
-            foreach (string fightPath in new[] { FirstFightPath, SecondFightPath, ThirdFightPath, TestFightPath })
-            {
-                if (File.Exists(fightPath)) scenePaths.Add(fightPath);
-            }
+            var scenePaths = new List<string> { BootstrapPath };
+            foreach (string path in new[] { ProloguePath, ExplorationPath, FirstFightPath,
+                SecondExplorationPath, SecondFightPath, ThirdExplorationPath, ThirdFightPath,
+                EndingPath, GameplayPath, TestFightPath })
+                if (File.Exists(path)) scenePaths.Add(path);
             if (File.Exists(SampleScenePath))
             {
                 scenePaths.Add(SampleScenePath);

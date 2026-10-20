@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Spotlight.Shared;
 
 namespace Spotlight.Exploration
 {
@@ -34,6 +35,11 @@ namespace Spotlight.Exploration
 
             InventoryItemKind kind = itemId < 2000 ? InventoryItemKind.Weapon : InventoryItemKind.Item;
             entries.Add(new InventoryEntry(itemId, kind, icon, displayName, description));
+            if (kind == InventoryItemKind.Weapon)
+            {
+                RunProgress.AddWeapon(itemId, icon, displayName);
+            }
+
             Changed?.Invoke();
             return true;
         }

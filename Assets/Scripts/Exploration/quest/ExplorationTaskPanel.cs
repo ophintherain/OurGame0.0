@@ -81,6 +81,9 @@ namespace Spotlight.Exploration
         /// <summary>收集武器是否已完成。</summary>
         public bool WeaponTaskCompleted { get; private set; }
 
+        /// <summary>观测怪异是否已解锁（本车厢至少拾取 1 件武器后为 true）。</summary>
+        public bool ObserveTaskUnlocked { get; private set; }
+
         /// <summary>观测怪异是否已完成。</summary>
         public bool ObserveTaskCompleted { get; private set; }
 
@@ -224,9 +227,9 @@ namespace Spotlight.Exploration
         /// <summary>后续剧情 / 交互系统调用，完成「观测怪异」任务。</summary>
         public void CompleteObserveTask()
         {
-            if (!WeaponTaskCompleted)
+            if (!ObserveTaskUnlocked)
             {
-                Debug.LogWarning("[Exploration] 收集武器任务尚未完成，观测怪异任务还未解锁。", this);
+                Debug.LogWarning("[Exploration] 观测怪异任务尚未解锁：本车厢需要至少拾取 1 件武器。", this);
                 return;
             }
 
@@ -238,6 +241,14 @@ namespace Spotlight.Exploration
             ObserveTaskCompleted = true;
             RefreshTasks();
             TaskCompleted?.Invoke(1);
+        }
+
+        /// <summary>场景加载时根据 RunProgress 恢复「观测怪异」已完成状态，不重复派发完成事件。</summary>
+        public void RestoreObserveTaskCompleted()
+        {
+            ObserveTaskUnlocked = true;
+            ObserveTaskCompleted = true;
+            RefreshTasks();
         }
 
         /// <summary>用第一行模板复制出第二行，放在下方，初始隐藏。</summary>
@@ -267,6 +278,17 @@ namespace Spotlight.Exploration
         private void RefreshTasks()
         {
             int weaponCount = inventory.GetEntries(InventoryItemKind.Weapon).Count;
+            // Each carriage has three local pickups. Inherited weapons do not complete its task.
+            string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            int[] localIds = scene == "second" ? new[] { 1003, 1004, 1007 } :
+                scene == "third" ? new[] { 1005, 1008, 1009 } : new[] { 1001, 1002, 1006 };
+            weaponCount = 0;
+            foreach (int id in localIds) if (inventory.Contains(id)) weaponCount++;
+
+            if (weaponCount >= 1 || ObserveTaskCompleted)
+            {
+                ObserveTaskUnlocked = true;
+            }
 
             if (!WeaponTaskCompleted && weaponCount >= weaponTargetCount)
             {
@@ -282,7 +304,7 @@ namespace Spotlight.Exploration
 
             if (secondRow != null)
             {
-                secondRow.SetActive(WeaponTaskCompleted);
+                secondRow.SetActive(ObserveTaskUnlocked);
             }
 
             if (secondTaskText != null)

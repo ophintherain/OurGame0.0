@@ -372,7 +372,9 @@ namespace Spotlight.Exploration
 
                 if (dialogueRoot != null && clone.transform.parent == dialogueRoot.transform.parent)
                 {
-                    clone.transform.SetSiblingIndex(dialogueRoot.transform.GetSiblingIndex());
+                    // 克隆槽位也要排在对话框之前，否则会盖住对话框
+                    int dialogueIndex = dialogueRoot.transform.GetSiblingIndex();
+                    clone.transform.SetSiblingIndex(Mathf.Max(0, dialogueIndex - 1));
                 }
 
                 portraitSlots.Add(clone);
@@ -420,7 +422,9 @@ namespace Spotlight.Exploration
                 portraitImage.transform.SetParent(parent, true);
             }
 
-            portraitImage.transform.SetSiblingIndex(dialogueRoot.transform.GetSiblingIndex());
+            // 注意要插到对话框索引的前一位；直接 SetSiblingIndex(对话框索引) 会排到对话框后面
+            int dialogueIndex = dialogueRoot.transform.GetSiblingIndex();
+            portraitImage.transform.SetSiblingIndex(Mathf.Max(0, dialogueIndex - 1));
         }
 
         private void HidePortrait()

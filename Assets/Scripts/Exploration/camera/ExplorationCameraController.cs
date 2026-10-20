@@ -56,11 +56,24 @@ namespace Spotlight.Exploration
 
         private float horizontalVelocity;
         private float verticalVelocity;
+        private Transform followOverride;
 
         /// <summary>当前实际的半屏宽（世界单位 = 正交 size × 相机宽高比）。</summary>
         public float HalfViewWidth => controlledCamera != null
             ? controlledCamera.orthographicSize * (controlledCamera.aspect > 0f ? controlledCamera.aspect : 1f)
             : 0f;
+
+        /// <summary>临时把横向跟随目标切到指定物体（例如被操纵的人偶）；传 null 等同于恢复跟随玩家。</summary>
+        public void SetFollowTarget(Transform target)
+        {
+            followOverride = target;
+        }
+
+        /// <summary>恢复跟随玩家。</summary>
+        public void ClearFollowTarget()
+        {
+            followOverride = null;
+        }
 
         private void Awake()
         {
@@ -88,7 +101,9 @@ namespace Spotlight.Exploration
 
             float deltaTime = Mathf.Max(0.0001f, Time.deltaTime);
             Vector3 current = transform.position;
-            float targetX = ClampCameraX(player.transform.position.x);
+            float targetX = ClampCameraX(followOverride != null
+                ? followOverride.position.x
+                : player.transform.position.x);
             float targetY = ResolveTargetY();
 
             float x = Mathf.SmoothDamp(current.x, targetX, ref horizontalVelocity,

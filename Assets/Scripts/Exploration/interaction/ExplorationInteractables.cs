@@ -283,11 +283,29 @@ namespace Spotlight.Exploration
                     continue;
                 }
 
+                SpriteRenderer renderer = point.visualObject != null
+                    ? point.visualObject.GetComponent<SpriteRenderer>()
+                    : null;
+
+                if (renderer != null)
+                {
+                    // 场景里已经摆好的立绘：保持用户的大小 / 位置 / Sorting Order，不生成副本
+                    runtimePoints.Add(new PointRuntime { Point = point, Renderer = renderer, Collected = false });
+                    continue;
+                }
+
+                if (point.visualObject != null)
+                {
+                    Debug.LogWarning(
+                        $"[Exploration] 交互点 {index} 的 visualObject 没有 SpriteRenderer，已退回自动生成占位。",
+                        point.visualObject);
+                }
+
                 GameObject visualObject = new GameObject($"Point_{index}");
                 visualObject.transform.SetParent(root, false);
                 visualObject.transform.position = new Vector3(point.position.x, point.position.y, 0f);
 
-                SpriteRenderer renderer = visualObject.AddComponent<SpriteRenderer>();
+                renderer = visualObject.AddComponent<SpriteRenderer>();
                 renderer.sortingOrder = highlightSortingOrder;
                 float scale = Mathf.Max(0.01f, point.visualScale);
 
@@ -350,6 +368,22 @@ namespace Spotlight.Exploration
 
             bool hasCustomWidth = point.rectSize.x > 0f;
             bool hasCustomHeight = point.rectSize.y > 0f;
+
+            // 场景里已经摆好的立绘：直接按 SpriteRenderer 的世界包围盒算点击范围
+            if (point.visualObject != null)
+            {
+                SpriteRenderer sceneRenderer = point.visualObject.GetComponent<SpriteRenderer>();
+                if (sceneRenderer != null && sceneRenderer.sprite != null)
+                {
+                    Bounds bounds = sceneRenderer.bounds;
+                    center = bounds.center;
+                    size = new Vector3(
+                        hasCustomWidth ? point.rectSize.x : bounds.size.x,
+                        hasCustomHeight ? point.rectSize.y : bounds.size.y,
+                        0f);
+                    return;
+                }
+            }
 
             Sprite sprite = point.visual;
             if (sprite != null)

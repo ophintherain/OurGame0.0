@@ -26,7 +26,13 @@ namespace Spotlight.Exploration
         LightsOn,
 
         /// <summary>Boss 判定开始（激活 Boss 占位物，如果有配置）。</summary>
-        SpawnBoss
+        SpawnBoss,
+
+        /// <summary>播放环境音（循环），音效 key 由 soundCueKey 指定。</summary>
+        PlayRuleSound,
+
+        /// <summary>停止本规则开始时播放的环境音。</summary>
+        StopRuleSound
     }
 
     /// <summary>
@@ -63,8 +69,14 @@ namespace Spotlight.Exploration
         [Tooltip("点击 forbiddenClickKey 时一次扣多少血，默认 3")]
         public float forbiddenClickDamage = 3f;
 
-        [Tooltip("本段开始时执行的场景动作：None=无；LightsOff=熄灯；LightsOn=开灯；SpawnBoss=开始 Boss 判定")]
+        [Tooltip("本段开始时执行的场景动作：None=无；LightsOff=熄灯；LightsOn=开灯；SpawnBoss=开始 Boss 判定；PlayRuleSound=播放环境音；StopRuleSound=停止环境音")]
         public RuleStageAction action = RuleStageAction.None;
+
+        [Tooltip("环境音 key，仅 PlayRuleSound 使用。对应 StoryAudioSet 里的条目名，例如「滴水声」。留空则不播")]
+        public string soundCueKey;
+
+        [Tooltip("点击完成本段时必须持有的物品 ID，0 = 不限制。没持有该物品时点击 completionClickKey 会按违规扣血，不会完成本段")]
+        public int completionClickRequiredItemId;
 
         /// <summary>本段是否必须靠点击完成。</summary>
         public bool HasCompletionClick => !string.IsNullOrWhiteSpace(completionClickKey);

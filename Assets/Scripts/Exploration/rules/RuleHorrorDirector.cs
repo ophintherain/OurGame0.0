@@ -28,7 +28,7 @@ namespace Spotlight.Exploration
         private ExplorationInventory inventory;
 
         [SerializeField]
-        [Tooltip("必填。本场景的规则集资产（第一车厢 6 组规则）")]
+        [Tooltip("必填。本场景的规则集资产，每个车厢一份（第一车厢 6 组，第二车厢 3 组，第三车厢 4 组）")]
         private RuleHorrorSet ruleSet;
 
         [SerializeField]
@@ -36,7 +36,7 @@ namespace Spotlight.Exploration
         private RuleDarkMask darkMask;
 
         [SerializeField]
-        [Tooltip("可选的 Boss 占位物。1-6 第二段开始时激活，规则完成时关闭；留空时只用右侧火区做判定")]
+        [Tooltip("可选的 Boss 占位物。规则动作 SpawnBoss 时激活，规则完成 / 中止时关闭；第二车厢不需要，可留空")]
         private GameObject bossObject;
 
         [SerializeField, Min(0f)]
@@ -76,6 +76,7 @@ namespace Spotlight.Exploration
         private float holdTimer;
         private float damageTimer;
         private bool waitingItemLogged;
+        private bool ruleSoundStarted;
         private Vector3 lastClickPosition;
         private bool hasLastClickPosition;
         private readonly HashSet<string> completedIds = new HashSet<string>();
@@ -233,8 +234,15 @@ namespace Spotlight.Exploration
 
         private void Update()
         {
-            if (!autoStart || health.IsDead)
+            if (!autoStart)
             {
+                return;
+            }
+
+            if (health.IsDead)
+            {
+                // 死亡后不再推进规则，同时停掉本规则开的环境音，避免水声残留
+                StopRuleSound();
                 return;
             }
 
@@ -424,6 +432,7 @@ namespace Spotlight.Exploration
             damageTimer = 0f;
             hasLastClickPosition = false;
             lastClickPosition = Vector3.zero;
+            ruleSoundStarted = false;
 
             storyDirector.SetManualAdvanceEnabled(false);
 
@@ -503,7 +512,32 @@ namespace Spotlight.Exploration
                     }
 
                     break;
+
+                case RuleStageAction.PlayRuleSound:
+                    if (currentStage != null && !string.IsNullOrWhiteSpace(currentStage.soundCueKey) &&
+                        storyDirector.PlayCue(currentStage.soundCueKey))
+                    {
+                        ruleSoundStarted = true;
+                    }
+
+                    break;
+
+                case RuleStageAction.StopRuleSound:
+                    storyDirector.StopAmbientCue();
+                    ruleSoundStarted = false;
+                    break;
             }
+        }
+
+        private void StopRuleSound()
+        {
+            if (!ruleSoundStarted || storyDirector == null)
+            {
+                return;
+            }
+
+            storyDirector.StopAmbientCue();
+            ruleSoundStarted = false;
         }
 
         private void UpdateActiveStage(float deltaTime)
@@ -595,6 +629,7 @@ namespace Spotlight.Exploration
 
             storyDirector.SetManualAdvanceEnabled(true);
             darkMask?.SetDark(false);
+            StopRuleSound();
 
             if (bossObject != null)
             {
@@ -627,6 +662,7 @@ namespace Spotlight.Exploration
 
             storyDirector.SetManualAdvanceEnabled(true);
             darkMask?.SetDark(false);
+            StopRuleSound();
 
             if (bossObject != null)
             {
@@ -668,6 +704,16 @@ namespace Spotlight.Exploration
             if (currentStage.HasCompletionClick &&
                 string.Equals(key, currentStage.completionClickKey, StringComparison.Ordinal))
             {
+                // 例如必须拿着长杆才能拉开窗帘；空手点目标按违规处理
+                if (currentStage.completionClickRequiredItemId > 0 &&
+                    (inventory == null || !inventory.Contains(currentStage.completionClickRequiredItemId)))
+                {
+                    holdTimer = 0f;
+                    health.ApplyDamage(currentStage.forbiddenClickDamage);
+                    PlayDamageCue();
+                    return;
+                }
+
                 lastClickPosition = worldPosition;
                 hasLastClickPosition = true;
                 CompleteStage();

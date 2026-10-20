@@ -103,17 +103,12 @@ namespace Spotlight.Battle
                     weapons.AvailableWeapons[index] != null && weapons.IsOwned(index);
                 Fill(cell, Panel);
                 Border(cell, 1f, Gold);
-                if (weapons.AvailableWeapons == null || index >= weapons.AvailableWeapons.Count ||
-                    weapons.AvailableWeapons[index] == null) continue;
-                Color previous = GUI.color;
-                GUI.color = available ? Color.white : new Color(0.45f, 0.45f, 0.45f);
+                if (!available) continue;
                 hud?.DrawAvailableWeaponIcon(weapons.AvailableWeapons[index],
                     new Rect(cell.x + 11f, cell.y + 3f, cell.width - 22f, cell.height - 6f));
-                GUI.color = previous;
                 if (weapons.IsSelected(index))
                     Fill(new Rect(cell.x + 1f, cell.y + 1f, cell.width - 2f, cell.height - 2f),
                         new Color(0.32f, 0.32f, 0.32f, 0.72f));
-                if (!available) continue;
                 if (!weapons.IsSelected(index) &&
                     GUI.Button(cell, new GUIContent("", weapons.AvailableWeapons[index].DisplayName), GUIStyle.none))
                 {

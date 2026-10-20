@@ -396,6 +396,12 @@ namespace Spotlight.Exploration
             DroppedItemPickup pickup = dropped.AddComponent<DroppedItemPickup>();
             pickup.Configure(inventory, entry.Id, entry.Icon, entry.DisplayName, entry.Description,
                 dropVisualHeight);
+
+            // 人偶丢到地上后仍然可以靠近按 F 操纵
+            if (ExplorationDollOperable.IsDollItem(entry.Id))
+            {
+                dropped.AddComponent<ExplorationDollOperable>();
+            }
         }
 
         /// <summary>
