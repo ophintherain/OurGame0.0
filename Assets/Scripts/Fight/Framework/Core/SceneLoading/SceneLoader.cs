@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using Spotlight.Shared;
 
 namespace Spotlight
 {
@@ -32,43 +31,21 @@ namespace Spotlight
 
             IsLoading = true;
             SetInputEnabled(false);
-            StartCoroutine(LoadRoutine(sceneName, requestSource));
-            return true;
-        }
-
-        private IEnumerator LoadRoutine(string sceneName, string requestSource)
-        {
+            if (!SpotlightSceneTransition.TryLoad(sceneName,
+                progress => LoadProgressed?.Invoke(sceneName, progress),
+                () =>
+                {
+                    SetInputEnabled(true);
+                    IsLoading = false;
+                    LoadCompleted?.Invoke(sceneName, requestSource);
+                },
+                reason => FinishWithFailure(sceneName, requestSource, reason)))
+            {
+                FinishWithFailure(sceneName, requestSource, "A transition is already running.");
+                return false;
+            }
             LoadStarted?.Invoke(sceneName, requestSource);
-            AsyncOperation operation;
-
-            try
-            {
-                operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
-            }
-            catch (Exception exception)
-            {
-                FinishWithFailure(sceneName, requestSource, exception.Message);
-                yield break;
-            }
-
-            if (operation == null)
-            {
-                FinishWithFailure(sceneName, requestSource, "Unity did not create an async load operation.");
-                yield break;
-            }
-
-            while (!operation.isDone)
-            {
-                float normalizedProgress = Mathf.Clamp01(operation.progress / 0.9f);
-                LoadProgressed?.Invoke(sceneName, normalizedProgress);
-                yield return null;
-            }
-
-            LoadProgressed?.Invoke(sceneName, 1f);
-            yield return null;
-            SetInputEnabled(true);
-            IsLoading = false;
-            LoadCompleted?.Invoke(sceneName, requestSource);
+            return true;
         }
 
         private void FinishWithFailure(string sceneName, string requestSource, string reason)

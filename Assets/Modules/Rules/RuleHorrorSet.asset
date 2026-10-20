@@ -1,0 +1,224 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eddbffdc9784803b6dc55de4313802b, type: 3}
+  m_Name: RuleHorrorSet
+  m_EditorClassIdentifier: 
+  rules:
+  - storyId: ch1_rule_01
+    title: 1-1
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions:
+      - type: 0
+        zones:
+        - minX: -6.81
+          maxX: -4.87
+        - minX: -2.93
+          maxX: -0.99
+        - minX: 0.95
+          maxX: 2.89
+        - minX: 4.83
+          maxX: 6.77
+        posture: 0
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 1
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 1
+    - combine: 1
+      conditions:
+      - type: 1
+        zones:
+        - minX: -6.81
+          maxX: -4.87
+        - minX: -2.93
+          maxX: -0.99
+        - minX: 0.95
+          maxX: 2.89
+        - minX: 4.83
+          maxX: 6.77
+        posture: 0
+        itemId: 0
+      - type: 2
+        zones: []
+        posture: 1
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 2
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 2
+  - storyId: ch1_rule_02
+    title: 1-2
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions: []
+      graceSeconds: 0
+      requiredHoldSeconds: 4
+      damagePerSecond: 0
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+    - combine: 0
+      conditions:
+      - type: 0
+        zones:
+        - minX: -8.75
+          maxX: -0.99
+        posture: 0
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 3
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+  - storyId: ch1_rule_03
+    title: 1-3
+    requiredItemId: 2001
+    stages:
+    - combine: 0
+      conditions:
+      - type: 4
+        zones: []
+        posture: 0
+        itemId: 2001
+      graceSeconds: 0
+      requiredHoldSeconds: 2
+      damagePerSecond: 0
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+    - combine: 0
+      conditions:
+      - type: 5
+        zones: []
+        posture: 0
+        itemId: 2001
+      graceSeconds: 4
+      requiredHoldSeconds: 0
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+  - storyId: ch1_rule_04
+    title: 1-4
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions:
+      - type: 0
+        zones:
+        - minX: -6.81
+          maxX: -4.87
+        - minX: -2.93
+          maxX: -0.99
+        - minX: 0.95
+          maxX: 2.89
+        - minX: 4.83
+          maxX: 6.77
+        posture: 0
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 1
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+    - combine: 0
+      conditions: []
+      graceSeconds: 4
+      requiredHoldSeconds: 5
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: Window
+      forbiddenClickDamage: 10
+      action: 0
+  - storyId: ch1_rule_05
+    title: 1-5
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions:
+      - type: 0
+        zones:
+        - minX: -8.75
+          maxX: -6.81
+        - minX: -4.87
+          maxX: -2.93
+        - minX: -0.99
+          maxX: 0.95
+        - minX: 2.89
+          maxX: 4.83
+        - minX: 6.77
+          maxX: 8.71
+        posture: 0
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 1
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+    - combine: 0
+      conditions:
+      - type: 2
+        zones: []
+        posture: 2
+        itemId: 0
+      graceSeconds: 4
+      requiredHoldSeconds: 2
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+  - storyId: ch1_rule_06
+    title: 1-6
+    requiredItemId: 0
+    stages:
+    - combine: 0
+      conditions: []
+      graceSeconds: 4
+      requiredHoldSeconds: 0
+      damagePerSecond: 10
+      completionClickKey: MuralEye
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 0
+    - combine: 0
+      conditions:
+      - type: 6
+        zones: []
+        posture: 0
+        itemId: 0
+        range: 3
+      graceSeconds: 4
+      requiredHoldSeconds: 5
+      damagePerSecond: 10
+      completionClickKey: 
+      forbiddenClickKey: 
+      forbiddenClickDamage: 10
+      action: 3

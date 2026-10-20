@@ -4,6 +4,7 @@
   "references": [
     "Spotlight.Runtime",
     "Spotlight.Battle",
+    "Spotlight.Shared",
     "Unity.ugui"
   ],
   "includePlatforms": [

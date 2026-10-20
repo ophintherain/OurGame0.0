@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.gasgiant.camera-shake": {
+      "version": "file:com.gasgiant.camera-shake",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "9.2.0",
       "depth": 1,

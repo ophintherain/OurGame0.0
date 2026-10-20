@@ -2,7 +2,8 @@
   "name": "Spotlight.Runtime",
   "rootNamespace": "Spotlight",
   "references": [
-    "Unity.ugui"
+    "Unity.ugui",
+    "Spotlight.Shared"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,4 +1,5 @@
 using System.Collections;
+using Spotlight.Shared;
 using UnityEngine;
 
 namespace Spotlight
@@ -12,6 +13,7 @@ namespace Spotlight
         [SerializeField] private RunSession runSession;
         [SerializeField] private SceneLoader sceneLoader;
         [SerializeField] private GameFlowController gameFlowController;
+        private StartMenuController startMenu;
 
         public void Configure(
             RunSession session,
@@ -42,6 +44,12 @@ namespace Spotlight
             sceneLoader ??= GetComponent<SceneLoader>();
             gameFlowController ??= GetComponent<GameFlowController>();
             gameFlowController?.Initialize(runSession, sceneLoader);
+            startMenu = GetComponent<StartMenuController>();
+            if (startMenu != null && gameFlowController != null)
+            {
+                startMenu.StartRequested += gameFlowController.StartNewRun;
+                if (sceneLoader != null) sceneLoader.LoadFailed += HandleMenuLoadFailed;
+            }
         }
 
         private IEnumerator Start()
@@ -57,10 +65,18 @@ namespace Spotlight
 
         private void OnDestroy()
         {
+            if (startMenu != null && gameFlowController != null)
+                startMenu.StartRequested -= gameFlowController.StartNewRun;
+            if (sceneLoader != null) sceneLoader.LoadFailed -= HandleMenuLoadFailed;
             if (Instance == this)
             {
                 Instance = null;
             }
+        }
+
+        private void HandleMenuLoadFailed(string sceneName, string requestSource, string reason)
+        {
+            startMenu?.UnlockInteraction();
         }
     }
 }

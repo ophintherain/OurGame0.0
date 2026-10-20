@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ch1_hint_03_move
+  m_EditorClassIdentifier: 
+  storyId: ch1_hint_03_move
+  chapterTitle: ch1_hint_03_move
+  playOnce: 1
+  lockPlayer: 0
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 2
+    speaker: "\u5F15\u5BFC"
+    text: "\uFF08\u5728\u5E7F\u64AD\u54CD\u8D77\u524D\uFF0C\u4F60\u6709\u5C3D\u53EF\u80FD\u591A\u7684\u63A2\u7D22\u65F6\u95F4\uFF09/\uFF08\u64CD\u7EB5WASD\u952E\u8FDB\u5165\u79FB\u52A8\uFF09"
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: "\u6587\u672C\u6846\u653E\u4E0A\u65B9\uFF0C\u5C45\u4E2D\uFF0C\u5F15\u5BFC\u8BED"
+    sceneTag: 1001
+    note: 

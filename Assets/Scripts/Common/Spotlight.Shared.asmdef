@@ -1,0 +1,6 @@
+{
+  "name": "Spotlight.Shared",
+  "rootNamespace": "Spotlight.Shared",
+  "references": ["Unity.ugui"],
+  "autoReferenced": true
+}

@@ -37,7 +37,10 @@ public class TaskUIManager : MonoBehaviour
     }
     void ToggleTaskPanel()
     {
-        gameObject.SetActive(!gameObject.activeSelf);
+        bool opening = !gameObject.activeSelf;
+        Spotlight.UISoundPlayer.Play(opening
+            ? Spotlight.UISoundCue.OpenTaskBar : Spotlight.UISoundCue.CloseTaskBar);
+        gameObject.SetActive(opening);
     }
     void RefreshTaskText()
     {

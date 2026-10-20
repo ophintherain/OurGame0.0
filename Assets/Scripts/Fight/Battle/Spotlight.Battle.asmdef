@@ -2,7 +2,8 @@
   "name": "Spotlight.Battle",
   "rootNamespace": "Spotlight.Battle",
   "references": [
-    "Spotlight.Runtime"
+    "Spotlight.Runtime",
+    "Spotlight.Shared"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

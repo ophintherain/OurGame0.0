@@ -1,4 +1,5 @@
 using UnityEngine;
+using Spotlight.Shared;
 
 namespace Spotlight
 {
@@ -21,8 +22,22 @@ namespace Spotlight
                 return;
             }
 
-            runSession.BeginNewRun();
-            EnterGameplay();
+            if (sceneLoader.RequestLoad("zero", nameof(GameFlowController)))
+            {
+                runSession.BeginNewRun();
+                RunProgress.Begin();
+            }
+        }
+
+        public bool EnterFirstExploration()
+        {
+            if (sceneLoader == null)
+            {
+                Debug.LogError("[GameFlow] Cannot enter exploration because SceneLoader is missing.", this);
+                return false;
+            }
+
+            return sceneLoader.RequestLoad("first", nameof(GameFlowController));
         }
 
         public void EnterGameplay()

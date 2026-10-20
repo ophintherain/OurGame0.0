@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using Spotlight.Shared;
 
 namespace Spotlight.Battle
 {
@@ -19,13 +21,17 @@ namespace Spotlight.Battle
         [SerializeField] private bool autoStartOnScene;
 
         private bool subscribed;
+        private bool fightSceneLoadout;
 
         public event Action BattleStarted;
         public event Action<BattleResult> BattleFinished;
 
         public bool IsBattleActive { get; private set; }
+        public bool IsLoadoutSelectionOpen { get; private set; }
         public BattleResult LastResult { get; private set; }
         public bool HasPendingWeaponDiscard => LastResult.RequiresWeaponDiscard;
+        public System.Collections.Generic.IReadOnlyList<CoverController> Covers => covers ?? Array.Empty<CoverController>();
+        public BattleArena Arena => arena;
 
         public void Configure(GameplayCoordinator phases, InputRouter router, PlayerMovement exploreMovement,
             PlayerBattleController battlePlayer, BossController battleBoss, WeaponController weaponController,
@@ -56,7 +62,8 @@ namespace Spotlight.Battle
 
         public bool TryBeginBattle()
         {
-            if (IsBattleActive || gameplayCoordinator == null || player == null || boss == null || arena == null)
+            if (IsBattleActive || IsLoadoutSelectionOpen || gameplayCoordinator == null ||
+                player == null || boss == null || arena == null)
             {
                 return false;
             }
@@ -93,10 +100,15 @@ namespace Spotlight.Battle
 
             player.Health?.ResetToFull();
             player.BeginBattle();
+            boss.SetWeaponController(weapons);
+            weapons?.ConfigureCarriage(boss.CarriageIndex);
             boss.BeginBattle();
             weapons?.BeginBattle();
             LastResult = default;
             IsBattleActive = true;
+            BattleHitFeedback feedback = GetComponent<BattleHitFeedback>();
+            if (feedback == null) feedback = gameObject.AddComponent<BattleHitFeedback>();
+            feedback.Configure(this, player, boss, weapons, cameraRig);
 
             if (!gameplayCoordinator.TryChangePhase(GameplayPhase.Battling))
             {
@@ -110,7 +122,7 @@ namespace Spotlight.Battle
 
         public bool TryStartOrRestart()
         {
-            if (IsBattleActive) return false;
+            if (IsBattleActive || IsLoadoutSelectionOpen) return false;
             if (gameplayCoordinator == null) return false;
 
             if (LastResult.RequiresWeaponDiscard)
@@ -132,6 +144,18 @@ namespace Spotlight.Battle
             return TryBeginBattle();
         }
 
+        public bool TryConfirmLoadoutAndStart()
+        {
+            if (!IsLoadoutSelectionOpen || weapons == null ||
+                weapons.SelectedCount == 0 || LastResult.RequiresWeaponDiscard)
+                return false;
+
+            IsLoadoutSelectionOpen = false;
+            if (TryStartOrRestart()) return true;
+            IsLoadoutSelectionOpen = true;
+            return false;
+        }
+
         public bool ResolveWeaponDiscard(int slot)
         {
             if (!LastResult.RequiresWeaponDiscard || weapons == null)
@@ -147,16 +171,31 @@ namespace Spotlight.Battle
 
             LastResult = new BattleResult(LastResult.Outcome, LastResult.PlayerHealth,
                 LastResult.BossHealth, false, removed.Id);
+            int itemId = removed.Id switch
+            {
+                "truce" => 1001, "barrage" => 1002, "leap" => 1003,
+                "mimic" => 1004, "poet" => 1005, "needle" => 1006,
+                "servitude" => 1007, "edge" => 1008, "recorder" => 1009,
+                _ => 0
+            };
+            if (itemId != 0) RunProgress.RemoveWeapon(itemId);
             return true;
         }
 
         public bool TryEscape()
         {
-            if (!IsBattleActive || !arena.IsEscapePosition(player.Position))
+            if (!IsBattleActive || !player.CanAct || !arena.IsEscapePosition(player.Position))
             {
                 return false;
             }
 
+            Finish(BattleOutcome.Escaped);
+            return true;
+        }
+
+        public bool TryReturnToLoadoutForDebug()
+        {
+            if (!IsBattleActive) return false;
             Finish(BattleOutcome.Escaped);
             return true;
         }
@@ -168,6 +207,29 @@ namespace Spotlight.Battle
 
         private IEnumerator Start()
         {
+            fightSceneLoadout = SceneManager.GetActiveScene().path.StartsWith("Assets/Scenes/fight/");
+            if (fightSceneLoadout)
+            {
+                inputRouter?.SetWorldInputEnabled(false);
+                if (explorationMovement != null) explorationMovement.enabled = false;
+                battleVisualRoot?.SetActive(true);
+                cameraRig?.SetBattleView(true);
+                player?.BeginBattle();
+                player?.EndBattle();
+                weapons?.ConfigureCarriage(boss.CarriageIndex);
+                if (SceneManager.GetActiveScene().name != "fight_test")
+                {
+                    weapons?.ApplyRunInventory();
+                    gameObject.AddComponent<BattleRunBridge>().Initialize(this, boss);
+                }
+                weapons?.PrepareSelection();
+                IsLoadoutSelectionOpen = true;
+                BattleLoadoutScreen screen = GetComponent<BattleLoadoutScreen>();
+                if (screen == null) screen = gameObject.AddComponent<BattleLoadoutScreen>();
+                screen.Configure(this, weapons, boss, GetComponent<BattleStatusHUD>());
+                yield break;
+            }
+
             if (!autoStartOnScene)
             {
                 yield break;
@@ -238,6 +300,7 @@ namespace Spotlight.Battle
             IsBattleActive = false;
             player.EndBattle();
             boss.EndBattle();
+            weapons?.EndBattle();
             float playerHealth = player.Health != null ? player.Health.CurrentHealth : 0f;
             bool needsDiscard = outcome == BattleOutcome.BossDefeated && player.Health != null &&
                                 player.Health.Normalized < 0.3f && weapons != null &&
@@ -260,6 +323,11 @@ namespace Spotlight.Battle
             }
 
             BattleFinished?.Invoke(LastResult);
+            if (fightSceneLoadout)
+            {
+                weapons?.PrepareSelection();
+                IsLoadoutSelectionOpen = true;
+            }
         }
     }
 }

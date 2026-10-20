@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Spotlight;
 using Spotlight.Battle;
+using Spotlight.Shared;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -19,12 +20,26 @@ namespace Spotlight.Editor
         private const string ModulesFolder = "Assets/Modules";
         private const string BootstrapPath = ScenesFolder + "/Bootstrap.unity";
         private const string GameplayPath = ScenesFolder + "/Gameplay.unity";
+        private const string ExplorationPath = ScenesFolder + "/explore/first.unity";
+        private const string ProloguePath = ScenesFolder + "/explore/zero.unity";
+        private const string SecondExplorationPath = ScenesFolder + "/explore/second.unity";
+        private const string ThirdExplorationPath = ScenesFolder + "/explore/third.unity";
+        private const string EndingPath = ScenesFolder + "/ending.unity";
         private const string FirstFightPath = ScenesFolder + "/fight/fight_1.unity";
+        private const string SecondFightPath = ScenesFolder + "/fight/fight_2.unity";
+        private const string ThirdFightPath = ScenesFolder + "/fight/fight_3.unity";
+        private const string TestFightPath = ScenesFolder + "/fight/fight_test.unity";
         private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
         private const string BattleDataFolder = ModulesFolder + "/Battle/Data";
-        private const string PrototypeWeaponPath = BattleDataFolder + "/PrototypeWeapon.asset";
-        private const string PrototypeShotgunPath = BattleDataFolder + "/PrototypeShotgun.asset";
-        private const string PrototypeRiflePath = BattleDataFolder + "/PrototypeRifle.asset";
+        private const string TrucePath = BattleDataFolder + "/Truce.asset";
+        private const string NeedlePath = BattleDataFolder + "/Needle.asset";
+        private const string BarragePath = BattleDataFolder + "/Barrage.asset";
+        private const string LeapPath = BattleDataFolder + "/Leap.asset";
+        private const string MimicPath = BattleDataFolder + "/Mimic.asset";
+        private const string ServitudePath = BattleDataFolder + "/Servitude.asset";
+        private const string PoetPath = BattleDataFolder + "/Poet.asset";
+        private const string EdgePath = BattleDataFolder + "/Edge.asset";
+        private const string RecorderPath = BattleDataFolder + "/Recorder.asset";
         private const string ArtworkFolder = "Assets/sprite";
 
         private static readonly string[] DeferredFolders =
@@ -51,10 +66,10 @@ namespace Spotlight.Editor
 
             int interactableLayer = EnsureLayer("Interactable");
             int walkableLayer = EnsureLayer("Walkable");
-            WeaponDefinition[] prototypeWeapons = CreateOrUpdatePrototypeWeapons();
+            WeaponDefinition[] skillWeapons = CreateOrUpdateSkillWeapons();
 
             BuildBootstrapScene();
-            BuildGameplayScene(interactableLayer, walkableLayer, prototypeWeapons);
+            BuildGameplayScene(interactableLayer, walkableLayer, skillWeapons);
             ConfigureBuildSettings();
 
             AssetDatabase.SaveAssets();
@@ -70,14 +85,21 @@ namespace Spotlight.Editor
             SceneLoader loader = root.AddComponent<SceneLoader>();
             GameFlowController flow = root.AddComponent<GameFlowController>();
             GameBootstrap bootstrap = root.AddComponent<GameBootstrap>();
+            StartMenuController menu = root.AddComponent<StartMenuController>();
+            menu.Configure(
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start01.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start02.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start03.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start04.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/Start/start05.png"));
 
             flow.Initialize(session, loader);
-            bootstrap.Configure(session, loader, flow, true);
+            bootstrap.Configure(session, loader, flow, false);
             EditorSceneManager.SaveScene(scene, BootstrapPath);
         }
 
         private static void BuildGameplayScene(int interactableLayer, int walkableLayer,
-            WeaponDefinition[] prototypeWeapons)
+            WeaponDefinition[] skillWeapons)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -97,6 +119,14 @@ namespace Spotlight.Editor
 
             GameObject playerObject = CreateSpriteBox("Player", world.transform, new Vector3(0f, -1.1f, 0f),
                 new Vector2(0.8f, 1.4f), new Color(0.2f, 0.62f, 1f, 1f), 0, 10);
+            SpriteRenderer playerArtwork = CreateArtwork("PlayerArtwork", playerObject.transform,
+                ArtworkFolder + "/Player/4001b.png", playerObject.transform.position,
+                new Vector2(3.2f, 5.2f), 10);
+            if (playerArtwork != null)
+            {
+                playerArtwork.transform.localPosition = new Vector3(0f, 2.25f, 0f);
+                playerObject.GetComponent<SpriteRenderer>().enabled = false;
+            }
             PlayerMovement playerMovement = playerObject.AddComponent<PlayerMovement>();
             playerMovement.Configure(5f, -8f, 8f);
 
@@ -119,7 +149,7 @@ namespace Spotlight.Editor
             cameraController.SetFollowTarget(playerObject.transform, mainCamera);
 
             BuildBattleGreybox(gameplayRoot, systems, world, coordinator, inputRouter,
-                playerMovement, playerObject, mainCamera, prototypeWeapons);
+                playerMovement, playerObject, mainCamera, skillWeapons);
 
             interactionController.Configure(playerObject.transform, coordinator);
             inputRouter.Configure(mainCamera, interactionController, playerMovement,
@@ -136,41 +166,48 @@ namespace Spotlight.Editor
 
         private static void BuildBattleGreybox(GameObject gameplayRoot, GameObject systems, GameObject world,
             GameplayCoordinator coordinator, InputRouter inputRouter, PlayerMovement playerMovement,
-            GameObject playerObject, Camera mainCamera, WeaponDefinition[] prototypeWeapons)
+            GameObject playerObject, Camera mainCamera, WeaponDefinition[] skillWeapons)
         {
             GameObject battleSystems = NewChild(systems, "BattleSystems");
             BattleArena arena = battleSystems.AddComponent<BattleArena>();
-            arena.Configure(8, 1.6f, -5.6f, 0);
+            arena.Configure(9, 1.8f, -7.2f, 0);
 
             CombatHealth playerHealth = playerObject.AddComponent<CombatHealth>();
             playerHealth.Configure(100f);
             PlayerBattleController battlePlayer = playerObject.AddComponent<PlayerBattleController>();
             battlePlayer.Configure(arena, playerHealth,
-                new BattlePosition(BattleLane.Corridor, 7));
+                new BattlePosition(BattleLane.Corridor, 8));
+            battlePlayer.ConfigureArtwork(
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001b.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001a.png"));
 
             GameObject battleVisualRoot = NewChild(world, "BattleEnvironment");
             CreateArtwork("BattleBackground", battleVisualRoot.transform, ArtworkFolder + "/Background/10011a.png",
                 Vector3.zero, new Vector2(17.78f, 10f), -100);
-            CreateBattleGrid(battleVisualRoot.transform, arena);
-
-            GameObject coverAObject = CreateSpriteBox("Cover_Front_3", battleVisualRoot.transform,
-                arena.GetWorldPosition(new BattlePosition(BattleLane.Foreground, 3)),
-                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
-            CoverController coverA = coverAObject.AddComponent<CoverController>();
-            coverA.Configure(new BattlePosition(BattleLane.Foreground, 3), 1);
-
-            GameObject coverBObject = CreateSpriteBox("Cover_Back_5", battleVisualRoot.transform,
-                arena.GetWorldPosition(new BattlePosition(BattleLane.Background, 5)),
-                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
-            CoverController coverB = coverBObject.AddComponent<CoverController>();
-            coverB.Configure(new BattlePosition(BattleLane.Background, 5), 1);
-            GameObject coverCObject = CreateSpriteBox("Cover_Front_4", battleVisualRoot.transform,
-                arena.GetWorldPosition(new BattlePosition(BattleLane.Foreground, 4)),
-                new Vector2(1.25f, 0.8f), new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
-            CoverController coverC = coverCObject.AddComponent<CoverController>();
-            coverC.Configure(new BattlePosition(BattleLane.Foreground, 4), 1);
-            CoverController[] covers = { coverA, coverB, coverC };
+            CreateArtwork("BattleForeground", battleVisualRoot.transform,
+                ArtworkFolder + "/Background/10011b.png", new Vector3(0f, -1.4f, 0f),
+                new Vector2(17.78f, 10f), 20);
+            CoverController[] covers =
+            {
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Foreground, 2,
+                    -4.3f, -3.8f, new Vector2(2.1f, 2.2f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Foreground, 4,
+                    1.03f, -3.8f, new Vector2(2.1f, 2.2f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Foreground, 6,
+                    6.52f, -3.8f, new Vector2(2.1f, 2.2f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Background, 0,
+                    -7.65f, -0.85f, new Vector2(1.6f, 1.3f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Background, 2,
+                    -3.9f, -0.85f, new Vector2(1.6f, 1.3f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Background, 4,
+                    -0.05f, -0.85f, new Vector2(1.6f, 1.3f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Background, 6,
+                    3.75f, -0.85f, new Vector2(1.6f, 1.3f)),
+                CreateArtworkTable(battleVisualRoot.transform, BattleLane.Background, 8,
+                    7.6f, -0.85f, new Vector2(1.6f, 1.3f))
+            };
             arena.ConfigureTables(covers);
+            CreateBattleGrid(battleVisualRoot.transform, arena);
 
             GameObject bossObject = CreateSpriteBox("PrototypeBoss", battleVisualRoot.transform,
                 arena.GetWorldPosition(new BattlePosition(BattleLane.Corridor, 4)),
@@ -179,8 +216,10 @@ namespace Spotlight.Editor
             if (bossSprite != null)
             {
                 bossObject.GetComponent<SpriteRenderer>().enabled = false;
-                CreateArtwork("BossArtwork", bossObject.transform, ArtworkFolder + "/Bosses/4002.png",
-                    bossObject.transform.position, new Vector2(1.2f, 1.8f), 15);
+                SpriteRenderer bossArtwork = CreateArtwork("BossArtwork", bossObject.transform, ArtworkFolder + "/Bosses/4002.png",
+                    bossObject.transform.position, new Vector2(3.4f, 5f), 15);
+                if (bossArtwork != null)
+                    bossArtwork.transform.localPosition = new Vector3(0f, 1.75f, 0f);
             }
             CombatHealth bossHealth = bossObject.AddComponent<CombatHealth>();
             bossHealth.Configure(1200f);
@@ -193,10 +232,11 @@ namespace Spotlight.Editor
             boss.ConfigureAttacks(3f, 1f, 15f, 30f);
 
             WeaponController weapons = battleSystems.AddComponent<WeaponController>();
-            weapons.Configure(prototypeWeapons, battlePlayer, boss, arena);
+            weapons.Configure(skillWeapons, battlePlayer, boss, arena);
 
             BattleCameraRig cameraRig = battleSystems.AddComponent<BattleCameraRig>();
-            cameraRig.Configure(mainCamera, 5f, 6.2f);
+            cameraRig.Configure(mainCamera, 5f, 6.2f, battleVisualRoot.transform,
+                arena, battlePlayer);
 
             BattleCoordinator battle = battleSystems.AddComponent<BattleCoordinator>();
             battle.Configure(coordinator, inputRouter, playerMovement, battlePlayer, boss, weapons,
@@ -207,14 +247,36 @@ namespace Spotlight.Editor
             inputRouter.SetCommandSink(commands);
 
             GameObject primaryWarning = CreateVisualBox("PrimaryAttackWarning", battleVisualRoot.transform,
-                Vector3.zero, new Vector2(1.45f, 1.15f), new Color(1f, 0.15f, 0.08f, 0.65f), 25);
+                Vector3.zero, new Vector2(2.2f, 1.35f), new Color(1f, 0.15f, 0.08f, 0.65f), 25);
             GameObject secondaryWarning = CreateVisualBox("SecondaryAttackWarning", battleVisualRoot.transform,
-                Vector3.zero, new Vector2(1.45f, 1.15f), new Color(1f, 0.55f, 0.08f, 0.65f), 24);
+                Vector3.zero, new Vector2(2.2f, 1.35f), new Color(1f, 0.55f, 0.08f, 0.65f), 24);
             BattleTelegraphView telegraphView = battleSystems.AddComponent<BattleTelegraphView>();
             telegraphView.Configure(boss, arena, primaryWarning, secondaryWarning);
 
             BattleDebugOverlay battleOverlay = battleSystems.AddComponent<BattleDebugOverlay>();
             battleOverlay.Configure(battle, battlePlayer, boss, weapons);
+            BattleStatusHUD statusHUD = battleSystems.AddComponent<BattleStatusHUD>();
+            statusHUD.Configure(battle, battlePlayer, boss,
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002b1.png"),
+                new[]
+                {
+                    AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002b2.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002b3.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002b4.png")
+                },
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002c1.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002c11.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002c2.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002c22.png"));
+            statusHUD.ConfigureOverview(arena,
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002a1.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002a2.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/UI/5002a3.png"));
+            Sprite[] weaponIcons = new Sprite[9];
+            for (int index = 0; index < weaponIcons.Length; index++)
+                weaponIcons[index] = AssetDatabase.LoadAssetAtPath<Sprite>(
+                    ArtworkFolder + "/Weapons/" + (index + 1) + ".png");
+            statusHUD.ConfigureWeapons(weapons, weaponIcons);
             battleVisualRoot.SetActive(false);
         }
 
@@ -222,9 +284,9 @@ namespace Spotlight.Editor
         {
             Color[] colors =
             {
-                new Color(0.12f, 0.25f, 0.32f, 0.8f),
-                new Color(0.18f, 0.18f, 0.23f, 0.8f),
-                new Color(0.18f, 0.28f, 0.2f, 0.8f)
+                new Color(0.12f, 0.25f, 0.32f, 0.18f),
+                new Color(0.18f, 0.18f, 0.23f, 0.22f),
+                new Color(0.18f, 0.28f, 0.2f, 0.18f)
             };
 
             for (int lane = 0; lane < 3; lane++)
@@ -232,8 +294,10 @@ namespace Spotlight.Editor
                 for (int column = 0; column < arena.ColumnCount; column++)
                 {
                     BattlePosition position = new BattlePosition((BattleLane)lane, column);
+                    if (position.Lane != BattleLane.Corridor && !arena.IsTablePosition(position))
+                        continue;
                     CreateVisualBox($"Cell_{position.Lane}_{column}", parent, arena.GetWorldPosition(position),
-                        new Vector2(1.45f, 1.15f), colors[lane], 0);
+                        new Vector2(1.8f, 1.35f), colors[lane], 0);
                 }
             }
         }
@@ -260,6 +324,26 @@ namespace Spotlight.Editor
             return gameObject;
         }
 
+        private static CoverController CreateArtworkTable(Transform parent, BattleLane lane,
+            int column, float x, float y, Vector2 size)
+        {
+            string row = lane == BattleLane.Foreground ? "Front" : "Back";
+            GameObject table = CreateSpriteBox($"Cover_{row}_{column}", parent,
+                new Vector3(x, y, 0f), size, new Color(0.55f, 0.34f, 0.18f, 1f), 0, 6);
+            CoverController cover = table.AddComponent<CoverController>();
+            cover.Configure(new BattlePosition(lane, column), 1);
+            if (lane == BattleLane.Foreground)
+            {
+                int maskNumber = column == 2 ? 3 : column == 4 ? 2 : 1;
+                cover.ConfigureBrokenMask(AssetDatabase.LoadAssetAtPath<Sprite>(
+                    ArtworkFolder + "/Carriage/1/010" + maskNumber + ".png"));
+            }
+            table.GetComponent<BoxCollider2D>().offset = lane == BattleLane.Foreground
+                ? new Vector2(0f, 1f) : new Vector2(0f, 0.48f);
+            table.GetComponent<SpriteRenderer>().enabled = false;
+            return cover;
+        }
+
         private static GameObject CreateVisualBox(string name, Transform parent, Vector3 position,
             Vector2 size, Color color, int sortingOrder)
         {
@@ -276,14 +360,14 @@ namespace Spotlight.Editor
             return gameObject;
         }
 
-        private static void CreateArtwork(string name, Transform parent, string path, Vector3 position,
+        private static SpriteRenderer CreateArtwork(string name, Transform parent, string path, Vector3 position,
             Vector2 size, int sortingOrder)
         {
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
             if (sprite == null)
             {
                 Debug.LogWarning($"[Spotlight] Artwork missing: {path}");
-                return;
+                return null;
             }
 
             GameObject artwork = new GameObject(name);
@@ -294,23 +378,30 @@ namespace Spotlight.Editor
             SpriteRenderer renderer = artwork.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.sortingOrder = sortingOrder;
+            return renderer;
         }
 
-        private static WeaponDefinition[] CreateOrUpdatePrototypeWeapons()
+        private static WeaponDefinition[] CreateOrUpdateSkillWeapons()
         {
             return new[]
             {
-                CreateOrUpdateWeapon(PrototypeWeaponPath, "prototype_sidearm", "Prototype Sidearm",
-                    120f, 1.25f, 4),
-                CreateOrUpdateWeapon(PrototypeShotgunPath, "prototype_shotgun", "Prototype Shotgun",
-                    220f, 2.5f, 2),
-                CreateOrUpdateWeapon(PrototypeRiflePath, "prototype_rifle", "Prototype Rifle",
-                    80f, 0.65f, 6)
+                CreateOrUpdateWeapon(TrucePath, "truce", "调停",
+                    0f, 7f, 1, WeaponSkill.Truce, 1, 3),
+                CreateOrUpdateWeapon(NeedlePath, "needle", "针刺",
+                    0f, 10f, 7, WeaponSkill.Needle, 1, 2),
+                CreateOrUpdateWeapon(BarragePath, "barrage", "弹雨",
+                    0f, 12f, 7, WeaponSkill.Barrage, 1, 1),
+                CreateOrUpdateWeapon(LeapPath, "leap", "跃迁", 0f, 7f, 7, WeaponSkill.Leap, 2, 9),
+                CreateOrUpdateWeapon(MimicPath, "mimic", "归我", 0f, 7f, 7, WeaponSkill.Mimic, 2, 4),
+                CreateOrUpdateWeapon(ServitudePath, "servitude", "附庸", 0f, 12f, 7, WeaponSkill.Servitude, 2, 6),
+                CreateOrUpdateWeapon(PoetPath, "poet", "诗者", 0f, 7f, 7, WeaponSkill.Poet, 3, 7),
+                CreateOrUpdateWeapon(EdgePath, "edge", "夺锋", 0f, 10f, 7, WeaponSkill.Edge, 3, 8),
+                CreateOrUpdateWeapon(RecorderPath, "recorder", "记录者", 0f, 20f, 7, WeaponSkill.Recorder, 3, 5)
             };
         }
 
         private static WeaponDefinition CreateOrUpdateWeapon(string path, string id, string displayName,
-            float damage, float cooldown, int range)
+            float damage, float cooldown, int range, WeaponSkill skill, int carriage, int priority)
         {
             WeaponDefinition weapon = AssetDatabase.LoadAssetAtPath<WeaponDefinition>(path);
             if (weapon == null)
@@ -320,6 +411,7 @@ namespace Spotlight.Editor
             }
 
             weapon.Configure(id, displayName, damage, cooldown, range, DamageKind.Ranged);
+            weapon.ConfigureSkill(skill, carriage, priority);
             EditorUtility.SetDirty(weapon);
             return weapon;
         }
@@ -379,11 +471,11 @@ namespace Spotlight.Editor
 
         private static void ConfigureBuildSettings()
         {
-            var scenePaths = new List<string> { BootstrapPath, GameplayPath };
-            if (File.Exists(FirstFightPath))
-            {
-                scenePaths.Add(FirstFightPath);
-            }
+            var scenePaths = new List<string> { BootstrapPath };
+            foreach (string path in new[] { ProloguePath, ExplorationPath, FirstFightPath,
+                SecondExplorationPath, SecondFightPath, ThirdExplorationPath, ThirdFightPath,
+                EndingPath, GameplayPath, TestFightPath })
+                if (File.Exists(path)) scenePaths.Add(path);
             if (File.Exists(SampleScenePath))
             {
                 scenePaths.Add(SampleScenePath);

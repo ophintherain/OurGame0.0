@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: ending_01
+  m_EditorClassIdentifier: 
+  storyId: ending_01
+  chapterTitle: ending_01
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\u65C1\u767D"
+    text: "\u4F60\u7AD9\u5728\u6F6E\u6C50\u4E4B\u6CC9\u524D\uFF0C\u66FE\u7ECF\u5FAE\u6BEB\u7684\u6DB2\u4F53\uFF0C\u5DF2\u7ECF\u7E41\u884D\u81F3\u6781\u5938\u5F20\u7684\u89C4\u6A21\u3002"
+    choices: []
+    portraitKey: "\u65C1\u767D"
+    audioCue: 
+    stageNote: "\u7ED3\u5C40\u89E6\u53D1"
+    sceneTag: 2001
+    note: 
+  - kind: 0
+    speaker: "\uFF1F\uFF1F"
+    text: "\u2026\u2026\u8BB8\u4E0B......\u4F60\u7684\u613F\u671B\u2026..."
+    choices: []
+    portraitKey: "\uFF1F\uFF1F"
+    audioCue: 
+    stageNote: "\u6587\u672C\u6846\u653E\u5C4F\u5E55\u4E2D\u95F4"
+    sceneTag: 2001
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u8BDB\u6740\u2014\u2014\u4F60\uFF01"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: "\u6587\u672C\u6846\u6B63\u4E2D\u592E\uFF0C\u8BF4\u5B8C\u5C4F\u5E55\u788E\u88C2\uFF0C\u70B9\u51FB\u8DF3\u53C2\u8003"
+    sceneTag: 2001
+    note: 
+  - kind: 1
+    speaker: "\u65C1\u767D"
+    text: "\u2026..."
+    choices: []
+    portraitKey: 
+    audioCue: 
+    stageNote: 
+    sceneTag: "\u9ED1\u5C4F"
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u2026\u2026\u8D70\u5427\uFF0C\u6211\u4EEC\u56DE\u5BB6\u3002"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: "\u6D88\u9664\u6CC9\u773C\uFF0C\u865A\u7A7A\u5269\u4E0B\u4E09\u4E2A\u73A9\u5076\u548C\u4E3B\u89D2\u7ACB\u7ED8"
+    sceneTag: 20011
+    note: 
+  - kind: 0
+    speaker: "\u73A9\u5BB6"
+    text: "\u2026\u2026\u6F6E\u6C50\u4E4B\u6DB2\u5DF2\u7ECF\u51C0\u5316\u6536\u5BB9\uFF0C\u53EF\u4EE5\u91CD\u5EFAS1\u4E86\u3002"
+    choices: []
+    portraitKey: "\u73A9\u5BB6"
+    audioCue: 
+    stageNote: 
+    sceneTag: 2001
+    note: 
