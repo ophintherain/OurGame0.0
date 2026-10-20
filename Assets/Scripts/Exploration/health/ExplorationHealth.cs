@@ -147,14 +147,7 @@ namespace Spotlight.Exploration
             ResetToFull();
 
             Scene active = SceneManager.GetActiveScene();
-            if (active.buildIndex >= 0)
-            {
-                SceneManager.LoadScene(active.buildIndex);
-            }
-            else
-            {
-                SceneManager.LoadScene(active.name);
-            }
+            Spotlight.Shared.SpotlightSceneTransition.TryLoad(active.name);
         }
     }
 }

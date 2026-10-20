@@ -83,6 +83,7 @@ namespace Spotlight.Battle
 
         private void OnGUI()
         {
+            if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
             if (battle == null) return;
             int oldDepth = GUI.depth;
             GUI.depth = -30;

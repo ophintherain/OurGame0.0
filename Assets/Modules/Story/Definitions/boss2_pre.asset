@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: boss2_pre
+  m_EditorClassIdentifier: 
+  storyId: boss2_pre
+  chapterTitle: boss2_pre
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u2026\u2026\u961f\u957f\u2026..."
+    choices: []
+    portraitKey: "\u9ed1\u5973\u5b69"
+    audioCue: ""
+    stageNote: "\u51fa\u573a\u8bed\u97f3\uff0c\u526a\u5f71"
+    sceneTag: "10021"
+    note: ""
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u2026...\u4e3a\u4ec0\u4e48\u2026...\u8981\u56de\u6765\u2026..."
+    choices: []
+    portraitKey: "\u9ed1\u5973\u5b69"
+    audioCue: ""
+    stageNote: "\u51fa\u573a\u8bed\u97f3\uff0c\u526a\u5f71"
+    sceneTag: "10021"
+    note: ""
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u2026\u2026\u4f60\u4e0d\u4fe1\u4efb\u6211\u5417\uff1f"
+    choices: []
+    portraitKey: "\u9ed1\u5973\u5b69"
+    audioCue: ""
+    stageNote: "\u51fa\u573a\u8bed\u97f3\uff0c\u526a\u5f71"
+    sceneTag: "10021"
+    note: ""
+  - kind: 1
+    speaker: "\u65c1\u767d"
+    text: "\u6c34\u6ef4\u843d\u5904\uff0c\u8fc5\u901f\u6c47\u8d77\u6025\u6d41\u3002\u6fc0\u6d41\u5347\u6d8c\uff0c\u805a\u6210\u4eba\u5f62\uff0c\u53c8\u5728\u6781\u77ed\u65f6\u95f4\u5185\u7ed3\u6210\u51b0\u96ea\u3002"
+    choices: []
+    portraitKey: ""
+    audioCue: ""
+    stageNote: ""
+    sceneTag: "10021"
+    note: ""
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u4f60\u4e0d\u4fe1\u4efb\u6211\uff0c\u4f60\u60f3\u8981\u628a\u6211\u629b\u5f00\uff01\u4f60\u5bb3\u6015\u6f6e\u6c50\u4e4b\u6db2\u6e85\u5728\u81ea\u5df1\u8eab\u4e0a\uff0c\u629b\u4e0b\u6211\u8d70\u4e86\uff01\uff01"
+    choices: []
+    portraitKey: "\u4f59\u6ce2\u7acb\u7ed8"
+    audioCue: ""
+    stageNote: "\u51fa\u573a\u8bed\u97f3\uff0c\u7acb\u7ed8"
+    sceneTag: "10021"
+    note: ""
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u90a3\u5c31\u4e0d\u8981\u79bb\u5f00\u4e86\u2026\u2026\u7559\u4e0b\u6765\u2026\u2026\u6c89\u6eba\u5728\u6c34\u4e2d\u5427\uff01"
+    choices: []
+    portraitKey: "\u4f59\u6ce2\u7acb\u7ed8"
+    audioCue: ""
+    stageNote: "\u51fa\u573a\u8bed\u97f3\uff0c\u7acb\u7ed8"
+    sceneTag: "10021"
+    note: ""

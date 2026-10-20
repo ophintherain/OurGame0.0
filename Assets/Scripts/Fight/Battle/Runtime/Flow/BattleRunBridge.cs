@@ -26,7 +26,7 @@ namespace Spotlight.Battle
         private void OnFinished(BattleResult result)
         {
             if (loading) return;
-            if (result.Outcome == BattleOutcome.PlayerDead) return; // Loadout reopens in this scene.
+            if (result.Outcome == BattleOutcome.PlayerDead) return; // Retry prompt handles the choice.
             if (result.Outcome == BattleOutcome.Escaped)
                 StartCoroutine(LoadAfterResult(ExploreScene(boss.CarriageIndex)));
             else if (result.Outcome == BattleOutcome.BossDefeated)
@@ -40,6 +40,11 @@ namespace Spotlight.Battle
             yield return null;
             while (battle != null && battle.HasPendingWeaponDiscard) yield return null;
             if (battle == null) yield break;
+            if (scene != ExploreScene(boss.CarriageIndex))
+            {
+                BattleStoryBridge story = GetComponent<BattleStoryBridge>();
+                if (story != null) yield return story.PlayAfterVictory();
+            }
             if (scene == "ending") RunProgress.SetCarriage(3);
             else if (scene == "second") RunProgress.SetCarriage(2);
             else if (scene == "third") RunProgress.SetCarriage(3);

@@ -94,7 +94,10 @@ namespace Spotlight.Battle
 
         private void OnGUI()
         {
-            if (battle == null || player == null || boss == null || !battle.IsBattleActive) return;
+            if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
+            if (battle == null || player == null || boss == null ||
+                (!battle.IsBattleActive && battle.LastResult.Outcome != BattleOutcome.BossDefeated))
+                return;
 
             int oldDepth = GUI.depth;
             Color oldColor = GUI.color;

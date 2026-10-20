@@ -12,12 +12,15 @@ namespace Spotlight.Battle
         private static readonly Color Panel = new Color(0.20f, 0.145f, 0.13f);
         private static readonly Color Gold = new Color(0.82f, 0.63f, 0.38f);
         private static readonly Color Ivory = new Color(0.98f, 0.91f, 0.78f);
-        private static readonly Rect RetryConfirmUv = new Rect(1128f / 3000f,
-            (1688f - 1479f) / 1688f, 402f / 3000f, 183f / 1688f);
+        // All three Retry layers share a 3000x1688 canvas; keep their original alignment.
+        private static readonly Rect RetryYesButton = new Rect(192f, 181f, 99f, 47f);
+        private static readonly Rect RetryNoButton = new Rect(307f, 189f, 99f, 43f);
         private BattleCoordinator battle;
         private WeaponController weapons;
         private BattleStatusHUD hud;
-        private Texture2D retryConfirm;
+        private Texture2D retryDialog;
+        private Texture2D retryYes;
+        private Texture2D retryNo;
 
         public void Configure(BattleCoordinator coordinator, WeaponController weaponController,
             BossController battleBoss, BattleStatusHUD statusHud)
@@ -25,26 +28,38 @@ namespace Spotlight.Battle
             battle = coordinator;
             weapons = weaponController;
             hud = statusHud;
-            Sprite confirmSprite = Resources.Load<Sprite>("RetryConfirm");
-            retryConfirm = confirmSprite != null ? confirmSprite.texture : null;
+            retryDialog = LoadRetryTexture("RetryDialog");
+            retryYes = LoadRetryTexture("RetryYes");
+            retryNo = LoadRetryTexture("RetryNo");
         }
 
         private void Update()
         {
-            if (battle != null && battle.IsRetryPromptOpen &&
-                (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+            if (battle == null || !battle.IsRetryPromptOpen) return;
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 UISoundPlayer.Play(UISoundCue.Click);
                 battle.TryConfirmRetry();
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                UISoundPlayer.Play(UISoundCue.Click);
+                battle.TryDeclineRetry();
             }
         }
 
         private void OnGUI()
         {
+            if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
             if (battle == null || weapons == null) return;
             if (battle.IsRetryPromptOpen)
             {
                 DrawRetryPrompt();
+                return;
+            }
+            if (battle.HasPendingWeaponDiscard)
+            {
+                DrawDiscardPrompt();
                 return;
             }
             if (!battle.IsLoadoutSelectionOpen) return;
@@ -67,7 +82,6 @@ namespace Spotlight.Battle
             for (int slot = 0; slot < 3; slot++) DrawSlot(slot);
             DrawConfirm();
             DrawInventory();
-            if (battle.HasPendingWeaponDiscard) DrawDiscardPrompt();
 
             GUI.color = oldColor;
             GUI.matrix = oldMatrix;
@@ -80,36 +94,42 @@ namespace Spotlight.Battle
             Matrix4x4 oldMatrix = GUI.matrix;
             Color oldColor = GUI.color;
             GUI.depth = -200;
-            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0f, 0f, 0f, 0.82f));
+            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0f, 0f, 0f, 0.8f));
             float scale = Mathf.Min(Screen.width / DesignWidth, Screen.height / DesignHeight);
             GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - DesignWidth * scale) / 2f,
                 (Screen.height - DesignHeight * scale) / 2f, 0f), Quaternion.identity,
                 new Vector3(scale, scale, 1f));
 
-            Rect panel = new Rect(112f, 82f, 400f, 208f);
-            Fill(panel, Panel);
-            Border(panel, 2f, Gold);
-            GUI.Label(new Rect(132f, 112f, 360f, 42f), "重新挑战？",
-                LabelStyle(28, TextAnchor.MiddleCenter, Ivory));
-            GUI.Label(new Rect(132f, 153f, 360f, 28f), "确认后重新选择武器",
-                LabelStyle(15, TextAnchor.MiddleCenter, Ivory));
-            Rect button = new Rect(242f, 202f, 140f, 64f);
-            if (retryConfirm != null)
-                GUI.DrawTextureWithTexCoords(button, retryConfirm, RetryConfirmUv, true);
-            else
+            Rect canvas = new Rect(0f, 0f, DesignWidth, DesignHeight);
+            if (retryDialog != null && retryYes != null && retryNo != null)
             {
-                Fill(button, Gold);
-                GUI.Label(button, "确认", LabelStyle(20, TextAnchor.MiddleCenter, Background));
+                GUI.DrawTexture(canvas, retryDialog, ScaleMode.StretchToFill, true);
+                GUI.DrawTexture(canvas, retryYes, ScaleMode.StretchToFill, true);
+                GUI.DrawTexture(canvas, retryNo, ScaleMode.StretchToFill, true);
             }
-            if (GUI.Button(button, GUIContent.none, GUIStyle.none))
+            else
+                GUI.Label(new Rect(0f, 110f, DesignWidth, 45f), "Retry?",
+                    LabelStyle(30, TextAnchor.MiddleCenter, Ivory));
+            if (GUI.Button(RetryYesButton, retryYes == null ? "YES" : "", GUIStyle.none))
             {
                 UISoundPlayer.Play(UISoundCue.Click);
                 battle.TryConfirmRetry();
+            }
+            if (GUI.Button(RetryNoButton, retryNo == null ? "NO" : "", GUIStyle.none))
+            {
+                UISoundPlayer.Play(UISoundCue.Click);
+                battle.TryDeclineRetry();
             }
 
             GUI.color = oldColor;
             GUI.matrix = oldMatrix;
             GUI.depth = oldDepth;
+        }
+
+        private static Texture2D LoadRetryTexture(string name)
+        {
+            Sprite sprite = Resources.Load<Sprite>(name);
+            return sprite != null ? sprite.texture : null;
         }
 
         private void DrawSlot(int slot)
@@ -179,24 +199,39 @@ namespace Spotlight.Battle
 
         private void DrawDiscardPrompt()
         {
-            Fill(new Rect(126f, 12f, 372f, 65f), Panel);
-            Border(new Rect(126f, 12f, 372f, 65f), 1f, Gold);
-            GUI.Label(new Rect(130f, 16f, 364f, 20f), "血量过低，请先选择一把武器丢弃",
-                LabelStyle(13, TextAnchor.MiddleCenter, Ivory));
+            int oldDepth = GUI.depth;
+            Matrix4x4 oldMatrix = GUI.matrix;
+            Color oldColor = GUI.color;
+            GUI.depth = -100;
+            Fill(new Rect(0, 0, Screen.width, Screen.height), Background);
+            float scale = Mathf.Min(Screen.width / DesignWidth, Screen.height / DesignHeight);
+            GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - DesignWidth * scale) / 2f,
+                (Screen.height - DesignHeight * scale) / 2f, 0f), Quaternion.identity,
+                new Vector3(scale, scale, 1f));
+            Rect panel = new Rect(85f, 85f, 454f, 180f);
+            Fill(panel, Panel);
+            Border(panel, 2f, Gold);
+            GUI.Label(new Rect(110f, 105f, 404f, 35f), "战斗胜利",
+                LabelStyle(23, TextAnchor.MiddleCenter, Ivory));
+            GUI.Label(new Rect(110f, 140f, 404f, 27f), "生命值偏低，请选择一把武器丢弃",
+                LabelStyle(14, TextAnchor.MiddleCenter, Ivory));
             int count = weapons.Loadout.Weapons.Count;
             for (int slot = 0; slot < count; slot++)
             {
                 int selectedSlot = slot;
-                Rect button = new Rect(134f + slot * 120f, 42f, 112f, 25f);
+                Rect button = new Rect(116f + slot * 136f, 190f, 120f, 38f);
                 Border(button, 1f, Gold);
                 GUI.Label(button, "丢弃 " + weapons.Loadout.Weapons[slot].Definition.DisplayName,
-                    LabelStyle(12, TextAnchor.MiddleCenter, Ivory));
+                    LabelStyle(14, TextAnchor.MiddleCenter, Ivory));
                 if (GUI.Button(button, GUIContent.none, GUIStyle.none))
                 {
                     UISoundPlayer.Play(UISoundCue.Click);
                     battle.ResolveWeaponDiscard(selectedSlot);
                 }
             }
+            GUI.color = oldColor;
+            GUI.matrix = oldMatrix;
+            GUI.depth = oldDepth;
         }
 
         private static GUIStyle LabelStyle(int size, TextAnchor alignment, Color color)

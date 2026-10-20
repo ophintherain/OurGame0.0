@@ -168,6 +168,15 @@ namespace Spotlight.Battle
             return true;
         }
 
+        public bool TryDeclineRetry()
+        {
+            if (!fightSceneLoadout || !IsRetryPromptOpen || IsBattleActive)
+                return false;
+            if (!SpotlightSceneTransition.TryLoad("Bootstrap")) return false;
+            IsRetryPromptOpen = false;
+            return true;
+        }
+
         public bool ResolveWeaponDiscard(int slot)
         {
             if (!LastResult.RequiresWeaponDiscard || weapons == null)
@@ -191,6 +200,7 @@ namespace Spotlight.Battle
                 _ => 0
             };
             if (itemId != 0) RunProgress.RemoveWeapon(itemId);
+            IsLoadoutSelectionOpen = false;
             return true;
         }
 
@@ -235,10 +245,13 @@ namespace Spotlight.Battle
                     gameObject.AddComponent<BattleRunBridge>().Initialize(this, boss);
                 }
                 weapons?.PrepareSelection();
-                IsLoadoutSelectionOpen = true;
+                IsLoadoutSelectionOpen = false;
                 BattleLoadoutScreen screen = GetComponent<BattleLoadoutScreen>();
                 if (screen == null) screen = gameObject.AddComponent<BattleLoadoutScreen>();
                 screen.Configure(this, weapons, boss, GetComponent<BattleStatusHUD>());
+                if (SceneManager.GetActiveScene().name == "fight_test" ||
+                    !gameObject.AddComponent<BattleStoryBridge>().Initialize(this, boss.CarriageIndex))
+                    IsLoadoutSelectionOpen = true;
                 yield break;
             }
 
@@ -250,6 +263,13 @@ namespace Spotlight.Battle
             // GameplayCoordinator enters Exploring in Start; begin the battle on the next frame.
             yield return null;
             TryBeginBattle();
+        }
+
+        public void OpenInitialLoadoutAfterStory()
+        {
+            if (fightSceneLoadout && !IsBattleActive && !IsRetryPromptOpen &&
+                !LastResult.RequiresWeaponDiscard)
+                IsLoadoutSelectionOpen = true;
         }
 
         private void OnEnable()
@@ -312,6 +332,8 @@ namespace Spotlight.Battle
             IsBattleActive = false;
             player.EndBattle();
             boss.EndBattle();
+            if (outcome == BattleOutcome.BossDefeated)
+                boss.HideAfterDefeat();
             weapons?.EndBattle();
             float playerHealth = player.Health != null ? player.Health.CurrentHealth : 0f;
             bool needsDiscard = outcome == BattleOutcome.BossDefeated && player.Health != null &&
@@ -342,11 +364,11 @@ namespace Spotlight.Battle
                     IsLoadoutSelectionOpen = false;
                     IsRetryPromptOpen = true;
                 }
-                else
+                else if (LastResult.RequiresWeaponDiscard)
                 {
-                    weapons?.PrepareSelection();
                     IsLoadoutSelectionOpen = true;
                 }
+                else IsLoadoutSelectionOpen = false;
             }
         }
     }

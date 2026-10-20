@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ namespace Spotlight.Shared
         private static SpotlightSceneTransition instance;
         private RawImage curtain;
         private Material material;
+        private readonly List<Canvas> hiddenCanvases = new List<Canvas>();
         public static bool IsTransitioning => instance != null && instance.running;
         private bool running;
 
@@ -57,7 +59,10 @@ namespace Spotlight.Shared
             canvasObject.transform.SetParent(transform, false);
             Canvas canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.overrideSorting = true;
             canvas.sortingOrder = short.MaxValue;
+            SortingLayer[] layers = SortingLayer.layers;
+            canvas.sortingLayerID = layers[layers.Length - 1].id;
             var imageObject = new GameObject("Iris", typeof(RectTransform), typeof(RawImage));
             imageObject.transform.SetParent(canvasObject.transform, false);
             RectTransform rect = imageObject.GetComponent<RectTransform>();
@@ -82,6 +87,8 @@ namespace Spotlight.Shared
                 yield break;
             }
             curtain.transform.parent.gameObject.SetActive(true);
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+            HideSceneCanvases();
             material.SetVector("_Center", FindPlayerScreenPosition());
             yield return Animate(0f, 1f);
             AsyncOperation operation = null;
@@ -92,6 +99,8 @@ namespace Spotlight.Shared
             {
                 yield return Animate(1f, 0f);
                 curtain.transform.parent.gameObject.SetActive(false);
+                SceneManager.sceneLoaded -= HandleSceneLoaded;
+                RestoreSceneCanvases();
                 running = false;
                 onFailure?.Invoke(failure ?? "Unity did not create an async load operation.");
                 yield break;
@@ -102,12 +111,39 @@ namespace Spotlight.Shared
                 yield return null;
             }
             onProgress?.Invoke(1f);
+            HideSceneCanvases(); // The newly loaded scene has a fresh set of UI canvases.
             yield return null;
             material.SetVector("_Center", FindPlayerScreenPosition());
             yield return Animate(1f, 0f);
             curtain.transform.parent.gameObject.SetActive(false);
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            RestoreSceneCanvases();
             running = false;
             onComplete?.Invoke();
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (running) HideSceneCanvases();
+        }
+
+        private void HideSceneCanvases()
+        {
+            Canvas curtainCanvas = curtain.GetComponentInParent<Canvas>();
+            foreach (Canvas canvas in Resources.FindObjectsOfTypeAll<Canvas>())
+            {
+                if (canvas == null || canvas == curtainCanvas || !canvas.gameObject.scene.IsValid() ||
+                    !canvas.enabled) continue;
+                hiddenCanvases.Add(canvas);
+                canvas.enabled = false;
+            }
+        }
+
+        private void RestoreSceneCanvases()
+        {
+            foreach (Canvas canvas in hiddenCanvases)
+                if (canvas != null) canvas.enabled = true;
+            hiddenCanvases.Clear();
         }
 
         private IEnumerator Animate(float from, float to)
@@ -135,6 +171,8 @@ namespace Spotlight.Shared
 
         private void OnDestroy()
         {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            RestoreSceneCanvases();
             if (instance == this) instance = null;
             if (material != null) Destroy(material);
         }

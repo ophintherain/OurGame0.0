@@ -22,6 +22,7 @@ namespace Spotlight
 
         private void OnGUI()
         {
+            if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
             GUILayout.BeginArea(new Rect(16, 16, 430, 110), GUI.skin.box);
             GUILayout.Label("SPOTLIGHT / FIRST-STAGE GREYBOX");
             GUILayout.Label($"Phase: {(coordinator != null ? coordinator.CurrentPhase.ToString() : "Missing")}");

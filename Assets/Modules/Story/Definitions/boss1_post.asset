@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2914f0dd0f88b4d4c9bbd7d5ce8e8263, type: 3}
+  m_Name: boss1_post
+  m_EditorClassIdentifier: 
+  storyId: boss1_post
+  chapterTitle: boss1_post
+  playOnce: 1
+  lockPlayer: 1
+  completeObserveTaskOnFinish: 0
+  lines:
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u597d\u75db\uff0c\u597d**\u6587\u660e\u7528\u8bed**\u75db\u554a\u2026..."
+    choices: []
+    portraitKey: "\u706b\u7fbd\u7acb\u7ed8"
+    audioCue: ""
+    stageNote: "\u51fb\u8d25\u8bed\u97f3\uff0c\u7acb\u7ed8"
+    sceneTag: "10011"
+    note: ""
+  - kind: 0
+    speaker: "\uff1f\uff1f"
+    text: "\u4f60\u4e0d\u662f\u8bf4\u597d\u4f1a\u9a6c\u4e0a\u56de\u6765\u5417\uff1f\u4e3a\u4ec0\u4e48\u8981\u6740\u6389\u6211\u2026\u2026\u961f\u957f\uff01\uff01!"
+    choices: []
+    portraitKey: "\u706b\u7fbd\u7acb\u7ed8"
+    audioCue: ""
+    stageNote: "\u51fb\u8d25\u8bed\u97f3\uff0c\u7acb\u7ed8"
+    sceneTag: "10011"
+    note: ""

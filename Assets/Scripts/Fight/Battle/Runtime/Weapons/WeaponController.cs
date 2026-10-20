@@ -58,8 +58,8 @@ namespace Spotlight.Battle
             int index = selectedOrder[slot];
             return index >= 0 && index < availableWeapons.Length ? availableWeapons[index] : null;
         }
-        public float SharedSkillDamageMultiplier => edgeRemaining > 0f ||
-            (boss != null && boss.IsBorrowedEdgeActive) ? 1.5f : 1f;
+        public float PlayerSkillDamageMultiplier => edgeRemaining > 0f ? 1.5f : 1f;
+        public float BossSkillDamageMultiplier => boss != null && boss.IsBorrowedEdgeActive ? 1.5f : 1f;
         public WeaponSkill LastUsedSkill => lastUsedSkill;
         public float NeedleRemaining => needleRemaining;
         public BattlePosition NeedlePosition => needlePosition;
@@ -398,7 +398,7 @@ namespace Spotlight.Battle
             if (boss == null || boss.Health == null || boss.IsInvisible || !boss.IsBattleActive)
                 return new DamageResolution(0f, false, false);
             DamageResolution resolution = DamageResolver.Resolve(boss.Health,
-                damage * SharedSkillDamageMultiplier,
+                damage * PlayerSkillDamageMultiplier,
                 DamageKind.Ranged, boss.Position, PlayerPosture.Standing);
             boss.NotifyDamageResolved(resolution);
             return resolution;

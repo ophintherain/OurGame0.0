@@ -162,6 +162,13 @@ namespace Spotlight.Battle
             UnsubscribeHealth();
         }
 
+        public void HideAfterDefeat()
+        {
+            SetBodyVisible(false);
+            if (crowVisual != null) crowVisual.SetActive(false);
+            if (borrowedNeedleVisual != null) borrowedNeedleVisual.SetActive(false);
+        }
+
         public void NotifyDamageResolved(DamageResolution resolution)
         {
             energy?.AddFromDamage(resolution.AppliedDamage);
@@ -377,7 +384,7 @@ namespace Spotlight.Battle
             if (player.Health == null || player.IsInvulnerable)
                 return new DamageResolution(0f, false, false);
 
-            float multiplier = isSkill && weapons != null ? weapons.SharedSkillDamageMultiplier : 1f;
+            float multiplier = isSkill && weapons != null ? weapons.BossSkillDamageMultiplier : 1f;
             DamageResolution result = DamageResolver.Resolve(player.Health, damage * multiplier,
                 kind, player.Position, player.Posture, FindCover(player.Position));
             if (carriageIndex == 3 && result.AppliedDamage > 0f) bleedStacks++;
@@ -485,7 +492,7 @@ namespace Spotlight.Battle
             {
                 if (!player.IsInvulnerable)
                 {
-                    float multiplier = weapons != null ? weapons.SharedSkillDamageMultiplier : 1f;
+                    float multiplier = weapons != null ? weapons.BossSkillDamageMultiplier : 1f;
                     player.Health.ApplyDamage(player.Health.MaxHealth * 0.007f * bleedStacks * multiplier);
                 }
                 bleedTickRemaining += 1f;

@@ -56,6 +56,7 @@ namespace Spotlight.Battle
 
         private void OnGUI()
         {
+            if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
             string sceneName = SceneManager.GetActiveScene().name;
             if (sceneName != "fight_test" && sceneName != "Gameplay") return;
             if (battle == null || player == null || boss == null || battle.IsLoadoutSelectionOpen)
