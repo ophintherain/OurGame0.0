@@ -50,8 +50,8 @@ namespace Spotlight.Exploration
         public float requiredHoldSeconds = 2f;
 
         [Min(0f)]
-        [Tooltip("不符合规定时每秒扣多少血。实际每次结算量 = 该值 × 调度器的伤害结算间隔")]
-        public float damagePerSecond = 10f;
+        [Tooltip("违规时每次结算扣多少血。结算间隔由 RuleHorrorDirector 的 damageTickSeconds 控制；默认 3")]
+        public float damagePerTick = 3f;
 
         [Tooltip("点击这个 key 立即完成本段。非空时本段只能靠点击完成，点击前持续扣血")]
         public string completionClickKey;
@@ -60,8 +60,8 @@ namespace Spotlight.Exploration
         public string forbiddenClickKey;
 
         [Min(0f)]
-        [Tooltip("点击 forbiddenClickKey 时一次扣多少血")]
-        public float forbiddenClickDamage = 10f;
+        [Tooltip("点击 forbiddenClickKey 时一次扣多少血，默认 3")]
+        public float forbiddenClickDamage = 3f;
 
         [Tooltip("本段开始时执行的场景动作：None=无；LightsOff=熄灯；LightsOn=开灯；SpawnBoss=开始 Boss 判定")]
         public RuleStageAction action = RuleStageAction.None;

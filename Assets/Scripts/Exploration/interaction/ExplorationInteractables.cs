@@ -201,7 +201,7 @@ namespace Spotlight.Exploration
                         break;
                     }
 
-                    bool added = inventory.Add(point.itemId, point.icon, point.displayName);
+                    bool added = inventory.Add(point.itemId, point.icon, point.displayName, point.hintText);
                     if (added && hintPanel != null && !string.IsNullOrWhiteSpace(point.hintText))
                     {
                         hintPanel.Show(point.hintText);

@@ -21,16 +21,18 @@ namespace Spotlight.Exploration
         private int itemId;
         private Sprite icon;
         private string displayName;
+        private string description;
         private bool collected;
 
         /// <summary>由 BackpackPanel 创建时注入数据。</summary>
         public void Configure(ExplorationInventory targetInventory, int id, Sprite itemIcon, string name,
-            float height)
+            string itemDescription, float height)
         {
             inventory = targetInventory;
             itemId = id;
             icon = itemIcon;
             displayName = name;
+            description = itemDescription;
             visualHeight = Mathf.Max(0.05f, height);
         }
 
@@ -81,7 +83,7 @@ namespace Spotlight.Exploration
                 return;
             }
 
-            if (inventory.Add(itemId, icon, displayName))
+            if (inventory.Add(itemId, icon, displayName, description))
             {
                 collected = true;
                 Destroy(gameObject);

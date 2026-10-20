@@ -8,12 +8,14 @@ namespace Spotlight.Exploration
     /// </summary>
     public sealed class InventoryEntry
     {
-        internal InventoryEntry(int id, InventoryItemKind kind, Sprite icon, string displayName)
+        internal InventoryEntry(int id, InventoryItemKind kind, Sprite icon, string displayName,
+            string description)
         {
             Id = id;
             Kind = kind;
             Icon = icon;
             DisplayName = displayName;
+            Description = description;
         }
 
         /// <summary>4 位物品 ID（1 开头=武器，2 开头=物品）。</summary>
@@ -27,5 +29,8 @@ namespace Spotlight.Exploration
 
         /// <summary>显示名称。</summary>
         public string DisplayName { get; internal set; }
+
+        /// <summary>功能说明 / 拾取提示，背包里左键格子时再次展示。</summary>
+        public string Description { get; internal set; }
     }
 }
