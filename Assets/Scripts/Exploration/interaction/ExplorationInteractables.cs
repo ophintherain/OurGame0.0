@@ -88,6 +88,24 @@ namespace Spotlight.Exploration
             }
 
             CreatePointVisuals();
+            if (inventory != null)
+            {
+                inventory.Changed += RefreshCollectedVisuals;
+                RefreshCollectedVisuals();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (inventory != null) inventory.Changed -= RefreshCollectedVisuals;
+        }
+
+        private void RefreshCollectedVisuals()
+        {
+            foreach (PointRuntime entry in runtimePoints)
+                if (entry.Renderer != null)
+                    entry.Renderer.enabled = entry.Point.type != ExplorationPointType.Item ||
+                        inventory == null || !inventory.Contains(entry.Point.itemId);
         }
 
         private void Update()
@@ -125,7 +143,7 @@ namespace Spotlight.Exploration
             for (int index = runtimePoints.Count - 1; index >= 0; index--)
             {
                 PointRuntime entry = runtimePoints[index];
-                if (entry.Renderer == null)
+                if (entry.Renderer == null || !entry.Renderer.enabled)
                 {
                     continue;
                 }

@@ -139,9 +139,9 @@ namespace Spotlight.Tests.PlayMode
             Assert.That(inputRouter.RouteCommand(GameplayInputCommand.ToggleOverviewZoom), Is.True);
             Assert.That(cameraRig.IsOverviewZoom, Is.False);
             Assert.That(inputRouter.RouteCommand(GameplayInputCommand.MoveLeft), Is.True);
-            Assert.That(player.Position.Column, Is.EqualTo(6));
+            Assert.That(player.Position.Column, Is.EqualTo(7));
 
-            for (int index = 0; index < 6; index++)
+            for (int index = 0; index < 7; index++)
             {
                 Assert.That(player.TryMoveHorizontal(-1), Is.True);
             }
@@ -153,21 +153,21 @@ namespace Spotlight.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator FightScene_StartsBattleAutomatically()
+        public IEnumerator FightScene_OpensLoadoutBeforeBattle()
         {
             yield return SceneManager.LoadSceneAsync("fight_1", LoadSceneMode.Single);
             BattleCoordinator battle = Object.FindObjectOfType<BattleCoordinator>();
             Assert.That(battle, Is.Not.Null);
 
             float deadline = Time.realtimeSinceStartup + 3f;
-            while (!battle.IsBattleActive && Time.realtimeSinceStartup < deadline)
+            while (!battle.IsLoadoutSelectionOpen && Time.realtimeSinceStartup < deadline)
             {
                 yield return null;
             }
 
-            Assert.That(battle.IsBattleActive, Is.True);
+            Assert.That(battle.IsLoadoutSelectionOpen, Is.True);
             Assert.That(Object.FindObjectOfType<GameplayCoordinator>().CurrentPhase,
-                Is.EqualTo(GameplayPhase.Battling));
+                Is.EqualTo(GameplayPhase.Exploring));
             Assert.That(GameObject.Find("BattleEnvironment"), Is.Not.Null);
         }
 

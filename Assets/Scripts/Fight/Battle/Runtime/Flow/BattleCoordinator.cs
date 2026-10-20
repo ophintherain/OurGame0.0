@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Spotlight.Shared;
 
 namespace Spotlight.Battle
 {
@@ -170,6 +171,14 @@ namespace Spotlight.Battle
 
             LastResult = new BattleResult(LastResult.Outcome, LastResult.PlayerHealth,
                 LastResult.BossHealth, false, removed.Id);
+            int itemId = removed.Id switch
+            {
+                "truce" => 1001, "barrage" => 1002, "leap" => 1003,
+                "mimic" => 1004, "poet" => 1005, "needle" => 1006,
+                "servitude" => 1007, "edge" => 1008, "recorder" => 1009,
+                _ => 0
+            };
+            if (itemId != 0) RunProgress.RemoveWeapon(itemId);
             return true;
         }
 
@@ -208,6 +217,11 @@ namespace Spotlight.Battle
                 player?.BeginBattle();
                 player?.EndBattle();
                 weapons?.ConfigureCarriage(boss.CarriageIndex);
+                if (SceneManager.GetActiveScene().name != "fight_test")
+                {
+                    weapons?.ApplyRunInventory();
+                    gameObject.AddComponent<BattleRunBridge>().Initialize(this, boss);
+                }
                 weapons?.PrepareSelection();
                 IsLoadoutSelectionOpen = true;
                 BattleLoadoutScreen screen = GetComponent<BattleLoadoutScreen>();

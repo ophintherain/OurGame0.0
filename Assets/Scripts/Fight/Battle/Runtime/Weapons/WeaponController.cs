@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Spotlight.Shared;
 
 namespace Spotlight.Battle
 {
@@ -18,6 +19,7 @@ namespace Spotlight.Battle
         private readonly BattleLoadout loadout = new BattleLoadout();
         private readonly List<int> selectedOrder = new List<int>(BattleLoadout.MaximumWeapons);
         private bool selectionPrepared;
+        private bool inventoryFromRun;
         private float needleRemaining;
         private float needleTickRemaining;
         private BattlePosition needlePosition;
@@ -112,6 +114,27 @@ namespace Spotlight.Battle
         public void ConfigureTestingUnlock(bool enabled)
         {
             unlockAllWeaponsForTesting = enabled;
+        }
+
+        public void ApplyRunInventory()
+        {
+            if (!RunProgress.Active) return;
+            EnsureInventoryInitialized();
+            inventoryFromRun = true;
+            selectedOrder.Clear();
+            for (int index = 0; index < availableWeapons.Length; index++)
+            {
+                string id = availableWeapons[index] != null ? availableWeapons[index].Id : null;
+                int itemId = id switch
+                {
+                    "truce" => 1001, "barrage" => 1002, "leap" => 1003,
+                    "mimic" => 1004, "poet" => 1005, "needle" => 1006,
+                    "servitude" => 1007, "edge" => 1008, "recorder" => 1009,
+                    _ => 0
+                };
+                ownedWeapons[index] = itemId != 0 && RunProgress.HasWeapon(itemId);
+                selectedWeapons[index] = false;
+            }
         }
 
         public void PrepareSelection()
@@ -545,6 +568,8 @@ namespace Spotlight.Battle
                 }
                 return;
             }
+
+            if (inventoryFromRun) return;
 
             for (int index = 0; index < availableWeapons.Length; index++)
             {

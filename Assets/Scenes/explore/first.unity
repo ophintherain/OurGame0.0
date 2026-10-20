@@ -2321,7 +2321,7 @@ MonoBehaviour:
     visual: {fileID: 0}
     visualScale: 0.4
     rectSize: {x: 0.62, y: 1.08}
-    itemId: 1001
+    itemId: 1006
     icon: {fileID: 21300000, guid: 2d5af4bd0a9c58a4898f85a3c7593994, type: 3}
     displayName: "\u9488\u523A"
     hintText: "\u5728\u8F66\u53A2\u7279\u5B9A\u533A\u57DF\u751F\u6210\u4F24\u5BB3\u533A\u57DF\uFF0C\u6301\u7EED3s\uFF0C\u671F\u95F4\u7ECF\u8FC7\u4F24\u5BB3\u533A\u57DF\u65F6\u6263\u9664\u8840\u91CF\uFF087%/1s\uFF09"

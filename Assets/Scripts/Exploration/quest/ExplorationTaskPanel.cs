@@ -221,6 +221,12 @@ namespace Spotlight.Exploration
         private void RefreshTasks()
         {
             int weaponCount = inventory.GetEntries(InventoryItemKind.Weapon).Count;
+            // Each carriage has three local pickups. Inherited weapons do not complete its task.
+            string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            int[] localIds = scene == "second" ? new[] { 1003, 1004, 1007 } :
+                scene == "third" ? new[] { 1005, 1008, 1009 } : new[] { 1001, 1002, 1006 };
+            weaponCount = 0;
+            foreach (int id in localIds) if (inventory.Contains(id)) weaponCount++;
 
             if (!WeaponTaskCompleted && weaponCount >= weaponTargetCount)
             {

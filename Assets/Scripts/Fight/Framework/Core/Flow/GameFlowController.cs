@@ -1,4 +1,5 @@
 using UnityEngine;
+using Spotlight.Shared;
 
 namespace Spotlight
 {
@@ -21,7 +22,11 @@ namespace Spotlight
                 return;
             }
 
-            if (EnterFirstExploration()) runSession.BeginNewRun();
+            if (sceneLoader.RequestLoad("zero", nameof(GameFlowController)))
+            {
+                runSession.BeginNewRun();
+                RunProgress.Begin();
+            }
         }
 
         public bool EnterFirstExploration()
