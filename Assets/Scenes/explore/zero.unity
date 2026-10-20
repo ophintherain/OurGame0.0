@@ -1817,11 +1817,11 @@ MonoBehaviour:
   proneVisual: {fileID: 4619424972080206828, guid: ea552d2638b09e140a66fe6310b6789e, type: 3}
   placeholderVisual: {fileID: 1000000033}
   standingMoveFrames:
-  - {fileID: 21300000, guid: 65bf73e57d604153ab461da08acd6b8a, type: 3}
-  - {fileID: 21300000, guid: edfeeb3c23194bb49c324df582a97ae6, type: 3}
-  - {fileID: 21300000, guid: 2e210e054209419ab5f6b078c5d24e0a, type: 3}
-  - {fileID: 21300000, guid: af869b049e044d0f9a1fafa211973174, type: 3}
-  - {fileID: 21300000, guid: 9b9863b689ad44c6a5bf30530d3d738b, type: 3}
+  - {fileID: 21300000, guid: c0c3f7ae78414545bc0a9f93939a726e, type: 3}
+  - {fileID: 21300000, guid: 460bb9a50fca42e4bce31e9a1fbbcc2f, type: 3}
+  - {fileID: 21300000, guid: 0b7defb10213421bb6427d58d6704012, type: 3}
+  - {fileID: 21300000, guid: 1286cb1138814f109358db87ae7740ab, type: 3}
+  - {fileID: 21300000, guid: f65a61d585184dfd895eb0a96e2b1779, type: 3}
   proneMoveFrames: []
   moveFramesPerSecond: 8
   proneVisualOffset: {x: 0, y: -0.8}

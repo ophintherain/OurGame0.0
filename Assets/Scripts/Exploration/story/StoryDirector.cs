@@ -20,7 +20,7 @@ namespace Spotlight.Exploration
         private StoryOverlayView view;
 
         [SerializeField]
-        [Tooltip("必填。Player 上的 ExplorationPlayerController，用于锁移动与读取 MoveCompleted")]
+        [Tooltip("可选。Player 上的 ExplorationPlayerController，用于锁移动与读取 MoveCompleted；纯剧情场景（没有探索角色）留空即可")]
         private ExplorationPlayerController player;
 
         [SerializeField]
@@ -119,6 +119,9 @@ namespace Spotlight.Exploration
         /// <summary>段落开始播放（参数为 storyId）。</summary>
         public event Action<string> StoryStarted;
 
+        /// <summary>每显示一行剧情时触发（当前行, 行索引）。供背景 CG 等演出系统使用。</summary>
+        public event Action<StoryLine, int> LineShown;
+
         /// <summary>段落结束或被 HideCurrent 收起（参数为 storyId）。</summary>
         public event Action<string> StoryFinished;
 
@@ -136,10 +139,10 @@ namespace Spotlight.Exploration
             backpackPanel ??= FindObjectOfType<BackpackPanel>();
             taskPanel ??= FindObjectOfType<ExplorationTaskPanel>();
 
-            if (library == null || view == null || player == null)
+            if (library == null || view == null)
             {
                 Debug.LogError(
-                    "[Story] StoryDirector 缺少 library / view / player 引用，剧情系统已禁用。",
+                    "[Story] StoryDirector 缺少 library / view 引用，剧情系统已禁用。",
                     this);
                 enabled = false;
                 return;
@@ -421,6 +424,7 @@ namespace Spotlight.Exploration
             }
 
             view.ShowLine(line, ResolvePortraits(line.portraitKey));
+            LineShown?.Invoke(line, lineIndex);
 
             Debug.Log(
                 $"[Story][AudioDiag] line={lineIndex} audioSet={(audioSet != null)} " +
