@@ -125,6 +125,7 @@ namespace Spotlight.Exploration
             }
 
             float now = Time.unscaledTime;
+            Spotlight.UISoundPlayer.PlayClickOncePerFrame();
 
             if (clickCount == 0)
             {

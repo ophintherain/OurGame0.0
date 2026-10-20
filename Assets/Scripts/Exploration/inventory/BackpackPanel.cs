@@ -277,6 +277,7 @@ namespace Spotlight.Exploration
         /// <summary>切换武器 / 物品页签，并刷新该页格子。</summary>
         public void SwitchTab(InventoryItemKind kind)
         {
+            if (kind != currentKind) Spotlight.UISoundPlayer.PlayClickOncePerFrame();
             currentKind = kind;
 
             if (weaponGridRoot != itemGridRoot)
@@ -361,6 +362,7 @@ namespace Spotlight.Exploration
                 return;
             }
 
+            Spotlight.UISoundPlayer.PlayClickOncePerFrame();
             hintPanel.Show(entry.Description);
         }
 
@@ -374,6 +376,7 @@ namespace Spotlight.Exploration
 
             if (inventory.Remove(entry.Id))
             {
+                Spotlight.UISoundPlayer.PlayClickOncePerFrame();
                 SpawnDroppedItem(entry);
             }
         }

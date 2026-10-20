@@ -17,34 +17,10 @@ namespace Spotlight.Battle
         public void Configure(BattleCoordinator coordinator, PlayerBattleController battlePlayer,
             BossController battleBoss, WeaponController weaponController)
         {
-            if (player != null) player.PostureChanged -= OnPostureChanged;
             battle = coordinator;
             player = battlePlayer;
             boss = battleBoss;
             weapons = weaponController;
-            SubscribePosture();
-        }
-
-        private void OnEnable()
-        {
-            SubscribePosture();
-        }
-
-        private void OnDisable()
-        {
-            if (player != null) player.PostureChanged -= OnPostureChanged;
-        }
-
-        private void SubscribePosture()
-        {
-            if (player == null) return;
-            player.PostureChanged -= OnPostureChanged;
-            player.PostureChanged += OnPostureChanged;
-        }
-
-        private static void OnPostureChanged(PlayerPosture previous, PlayerPosture current)
-        {
-            UISoundPlayer.Play(UISoundCue.SwitchAction);
         }
 
         private static bool ClickedButton(string label)

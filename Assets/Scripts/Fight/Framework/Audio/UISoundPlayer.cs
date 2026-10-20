@@ -25,6 +25,14 @@ namespace Spotlight
 
         private static readonly AudioClip[] Clips = new AudioClip[8];
         private static AudioSource source;
+        private static int lastClickFrame = -1;
+
+        public static void PlayClickOncePerFrame()
+        {
+            if (lastClickFrame == Time.frameCount) return;
+            lastClickFrame = Time.frameCount;
+            Play(UISoundCue.Click);
+        }
 
         public static void Play(UISoundCue cue)
         {

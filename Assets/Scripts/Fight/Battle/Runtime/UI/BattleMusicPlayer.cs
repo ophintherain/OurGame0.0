@@ -14,6 +14,7 @@ namespace Spotlight.Battle
         private BattleCoordinator battle;
         private BossController boss;
         private AudioSource current;
+        private AudioSource lowHealthLayer;
         private Coroutine fade;
         private string currentName;
 
@@ -36,7 +37,24 @@ namespace Spotlight.Battle
                 sources[index].spatialBlend = 0f;
                 sources[index].volume = 0f;
             }
+            var layerObject = new GameObject("Low Health Bass Layer");
+            layerObject.transform.SetParent(transform, false);
+            lowHealthLayer = layerObject.AddComponent<AudioSource>();
+            lowHealthLayer.playOnAwake = false;
+            lowHealthLayer.loop = true;
+            lowHealthLayer.spatialBlend = 0f;
+            lowHealthLayer.volume = 0f;
+            layerObject.AddComponent<AudioLowPassFilter>().cutoffFrequency = 320f;
             SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void Update()
+        {
+            if (lowHealthLayer == null) return;
+            float target = battle != null && battle.IsBattleActive && battle.PlayerHealthNormalized <= 0.3f
+                ? MusicVolume * 0.55f : 0f;
+            lowHealthLayer.volume = Mathf.MoveTowards(lowHealthLayer.volume, target,
+                Time.unscaledDeltaTime * MusicVolume);
         }
 
         private void OnDestroy()
@@ -81,9 +99,21 @@ namespace Spotlight.Battle
         {
             // The supplied pack has two boss tracks; the third carriage uses track two.
             Play(boss != null && boss.CarriageIndex == 1 ? "battle_boss_1" : "battle_boss_2");
+            if (lowHealthLayer != null && current != null && current.clip != null)
+            {
+                lowHealthLayer.Stop();
+                lowHealthLayer.clip = current.clip;
+                lowHealthLayer.timeSamples = current.timeSamples;
+                lowHealthLayer.volume = 0f;
+                lowHealthLayer.Play();
+            }
         }
 
-        private void OnBattleFinished(BattleResult result) => PlayCarriage();
+        private void OnBattleFinished(BattleResult result)
+        {
+            if (lowHealthLayer != null) lowHealthLayer.Stop();
+            PlayCarriage();
+        }
 
         private void PlayCarriage()
         {
@@ -130,6 +160,7 @@ namespace Spotlight.Battle
             if (fade != null) StopCoroutine(fade);
             fade = null;
             foreach (AudioSource source in sources) source?.Stop();
+            if (lowHealthLayer != null) lowHealthLayer.Stop();
             current = null;
             currentName = null;
         }

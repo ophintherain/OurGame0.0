@@ -118,7 +118,6 @@ namespace Spotlight.Battle
 
         public void ApplyRunInventory()
         {
-            if (!RunProgress.Active) return;
             EnsureInventoryInitialized();
             inventoryFromRun = true;
             selectedOrder.Clear();
@@ -307,6 +306,7 @@ namespace Spotlight.Battle
                     return false;
             }
             player?.PlayCastingPose();
+            BattleSoundPlayer.PlayWeapon(weapon.Definition.Skill);
             WeaponUsed?.Invoke(slot, resolution);
             if (weapon.Definition.Skill != WeaponSkill.Mimic)
                 lastUsedSkill = weapon.Definition.Skill;

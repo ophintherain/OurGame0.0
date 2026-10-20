@@ -332,6 +332,7 @@ namespace Spotlight.Exploration
             Posture = next;
             ApplyPose();
             PostureChanged?.Invoke(previous, next);
+            Spotlight.UISoundPlayer.Play(Spotlight.UISoundCue.SwitchAction);
         }
 
         /// <summary>

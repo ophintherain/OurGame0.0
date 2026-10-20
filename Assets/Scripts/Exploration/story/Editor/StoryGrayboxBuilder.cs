@@ -196,8 +196,9 @@ namespace Spotlight.Exploration.StoryEditor
             speakerRect.anchorMin = new Vector2(0f, 1f);
             speakerRect.anchorMax = new Vector2(0f, 1f);
             speakerRect.pivot = new Vector2(0f, 1f);
-            speakerRect.anchoredPosition = new Vector2(40f, -24f);
-            speakerRect.sizeDelta = new Vector2(500f, 50f);
+            speakerRect.anchoredPosition = new Vector2(40f, -31.914f);
+            speakerRect.sizeDelta = new Vector2(500f, 42.086f);
+            speakerText.margin = new Vector4(174.10565f, -5.935425f, 0f, 3.9570312f);
 
             bodyText = CreateText(dialoguePanel.transform, "BodyText", "剧情正文示例。",
                 28f, TextAlignmentOptions.TopLeft, Color.white, font);
@@ -205,8 +206,9 @@ namespace Spotlight.Exploration.StoryEditor
             bodyRect.anchorMin = new Vector2(0f, 1f);
             bodyRect.anchorMax = new Vector2(1f, 1f);
             bodyRect.pivot = new Vector2(0.5f, 1f);
-            bodyRect.anchoredPosition = new Vector2(0f, -70f);
-            bodyRect.sizeDelta = new Vector2(-80f, 170f);
+            bodyRect.anchoredPosition = new Vector2(0f, -97.69867f);
+            bodyRect.sizeDelta = new Vector2(-80f, 142.3013f);
+            bodyText.margin = new Vector4(172.12708f, 0f, 21.76294f, -43.52649f);
 
             continueHint = CreateText(dialoguePanel.transform, "ContinueHint", "点击继续",
                 22f, TextAlignmentOptions.BottomRight, new Color(0.75f, 0.75f, 0.75f, 1f), font).gameObject;

@@ -52,6 +52,7 @@ namespace Spotlight.Battle
         {
             if (Spotlight.Shared.SpotlightSceneTransition.IsTransitioning) return;
             if (battle == null || weapons == null) return;
+            if (battle.IsVictoryEffectPlaying) return;
             if (battle.IsRetryPromptOpen)
             {
                 DrawRetryPrompt();
@@ -148,7 +149,7 @@ namespace Spotlight.Battle
             hud?.DrawAvailableWeaponIcon(definition, new Rect(center - 22f, 124f, 44f, 44f));
             if (GUI.Button(new Rect(center - 33f, 113f, 66f, 66f), GUIContent.none, GUIStyle.none))
             {
-                UISoundPlayer.Play(UISoundCue.Click);
+                UISoundPlayer.Play(UISoundCue.PageTurn);
                 weapons.TryRemoveSelectionSlot(slot);
             }
         }
@@ -191,7 +192,7 @@ namespace Spotlight.Battle
                 if (!weapons.IsSelected(index) &&
                     GUI.Button(cell, new GUIContent("", weapons.AvailableWeapons[index].DisplayName), GUIStyle.none))
                 {
-                    UISoundPlayer.Play(UISoundCue.Click);
+                    UISoundPlayer.Play(UISoundCue.PageTurn);
                     weapons.TrySelect(index);
                 }
             }

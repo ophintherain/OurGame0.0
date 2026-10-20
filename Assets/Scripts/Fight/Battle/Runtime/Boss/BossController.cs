@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Spotlight.Battle
@@ -81,6 +82,7 @@ namespace Spotlight.Battle
             if (!IsBattleActive || telegraphActive) return;
             LastSkill = BossSkill.TripleStrike;
             strikesRemaining = 3;
+            BattleSoundPlayer.PlayBossSkill(carriageIndex);
             StartAttack(true);
         }
         public BattleTelegraph ActiveTelegraph => pendingTelegraph;
@@ -169,6 +171,66 @@ namespace Spotlight.Battle
             if (borrowedNeedleVisual != null) borrowedNeedleVisual.SetActive(false);
         }
 
+        public void SetStoryVisible(bool visible)
+        {
+            SetBodyVisible(visible);
+        }
+
+        public IEnumerator PlayDefeatDissolve(float duration)
+        {
+            Material template = Resources.Load<Material>("BossDefeatDissolve");
+            if (template == null || template.shader == null || !template.shader.isSupported)
+            {
+                Debug.LogWarning("[Battle] Boss defeat material is unavailable; hiding the boss without dissolve.", this);
+                HideAfterDefeat();
+                yield break;
+            }
+
+            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+            Material[] originals = new Material[renderers.Length];
+            Material[] dissolveMaterials = new Material[renderers.Length];
+            MaterialPropertyBlock properties = new MaterialPropertyBlock();
+            for (int index = 0; index < renderers.Length; index++)
+            {
+                SpriteRenderer renderer = renderers[index];
+                if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy ||
+                    renderer.sprite == null) continue;
+                originals[index] = renderer.sharedMaterial;
+                dissolveMaterials[index] = new Material(template);
+                renderer.sharedMaterial = dissolveMaterials[index];
+            }
+
+            float elapsed = 0f;
+            duration = Mathf.Max(0.05f, duration);
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.Clamp01(elapsed / duration);
+                for (int index = 0; index < renderers.Length; index++)
+                {
+                    if (dissolveMaterials[index] == null || renderers[index] == null) continue;
+                    renderers[index].GetPropertyBlock(properties);
+                    properties.SetFloat("_Dissolve", progress);
+                    renderers[index].SetPropertyBlock(properties);
+                }
+                yield return null;
+            }
+
+            HideAfterDefeat();
+            for (int index = 0; index < renderers.Length; index++)
+            {
+                if (dissolveMaterials[index] == null) continue;
+                if (renderers[index] != null)
+                {
+                    renderers[index].sharedMaterial = originals[index];
+                    renderers[index].GetPropertyBlock(properties);
+                    properties.SetFloat("_Dissolve", 0f);
+                    renderers[index].SetPropertyBlock(properties);
+                }
+                Destroy(dissolveMaterials[index]);
+            }
+        }
+
         public void NotifyDamageResolved(DamageResolution resolution)
         {
             energy?.AddFromDamage(resolution.AppliedDamage);
@@ -240,6 +302,7 @@ namespace Spotlight.Battle
 
         private void StartAttack(bool empowered)
         {
+            if (!empowered) BattleSoundPlayer.Play("boss通用攻击");
             BattlePosition primary = player.Position;
             BattlePosition? secondary = null;
             DamageKind kind = DamageKind.Ranged;
@@ -284,6 +347,7 @@ namespace Spotlight.Battle
 
             LastSkill = BossSkill.TripleStrike;
             strikesRemaining = 3;
+            BattleSoundPlayer.PlayBossSkill(carriageIndex);
             StartAttack(true);
         }
 
@@ -334,6 +398,7 @@ namespace Spotlight.Battle
 
             LastSkill = BossSkill.BorrowedWeapon;
             lastBorrowedSkill = chosen;
+            BattleSoundPlayer.PlayBossSkill(carriageIndex);
             return true;
         }
 
@@ -344,6 +409,7 @@ namespace Spotlight.Battle
             crowAttackCooldown = normalAttackInterval;
             crowAttackSequence = 0;
             LastSkill = BossSkill.SummonCrow;
+            BattleSoundPlayer.PlayBossSkill(carriageIndex);
             EnsureCrowVisual();
             crowVisual?.SetActive(true);
         }
@@ -353,7 +419,8 @@ namespace Spotlight.Battle
             if (!IsBattleActive) return;
             invisibilityRemaining = Mathf.Max(invisibilityRemaining, seconds);
             LastSkill = BossSkill.Invisibility;
-            SetBodyVisible(false);
+            BattleSoundPlayer.PlayBossSkill(carriageIndex);
+            SetBodyOpacity(0.1f);
         }
 
         private void ResolvePendingAttack()
@@ -426,6 +493,7 @@ namespace Spotlight.Battle
 
         private void StartCrowAttack(bool empowered)
         {
+            BattleSoundPlayer.Play("boss通用攻击");
             BattlePosition target = player.Position;
             if (empowered)
                 target = new BattlePosition(target.Lane,
@@ -570,6 +638,11 @@ namespace Spotlight.Battle
 
         private void SetBodyVisible(bool visible)
         {
+            SetBodyOpacity(visible ? 1f : 0f);
+        }
+
+        private void SetBodyOpacity(float opacity)
+        {
             if (bodyRenderers == null)
             {
                 bodyRenderers = GetComponentsInChildren<SpriteRenderer>(true);
@@ -581,7 +654,7 @@ namespace Spotlight.Battle
             {
                 if (bodyRenderers[index] == null || bodyRenderers[index].gameObject == crowVisual) continue;
                 Color color = bodyColors[index];
-                color.a = visible ? bodyColors[index].a : 0f;
+                color.a = bodyColors[index].a * opacity;
                 bodyRenderers[index].color = color;
             }
         }

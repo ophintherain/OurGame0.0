@@ -48,8 +48,7 @@ namespace Spotlight.Exploration
                 wordWrap = true
             };
             style.normal.textColor = Color.white;
-            GUI.Label(panel, (string.IsNullOrEmpty(current.speaker) ? "" : current.speaker + "\n") +
-                current.text + "\n[点击 / 空格继续]", style);
+            GUI.Label(panel, current.text, style);
         }
     }
 }

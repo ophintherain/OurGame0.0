@@ -10,9 +10,13 @@ namespace Spotlight.Exploration
         private StoryDirector story;
         private ExplorationInventory inventory;
         private ExplorationTaskPanel tasks;
+        private ExplorationPlayerController player;
+        private ExplorationMap map;
+        private ExplorationHintPanel hint;
         private string sceneName;
         private int carriage;
         private bool leaving;
+        private bool exitReady;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Install()
@@ -37,19 +41,50 @@ namespace Spotlight.Exploration
                 return;
             }
 
+            if (!RunProgress.Active) RunProgress.Begin();
             carriage = sceneName == "first" ? 1 : sceneName == "second" ? 2 : 3;
             RunProgress.SetCarriage(carriage);
             inventory = FindObjectOfType<ExplorationInventory>();
             tasks = FindObjectOfType<ExplorationTaskPanel>();
-            if (inventory == null || tasks == null)
+            player = FindObjectOfType<ExplorationPlayerController>();
+            map = FindObjectOfType<ExplorationMap>();
+            hint = FindObjectOfType<ExplorationHintPanel>();
+            if (inventory == null || tasks == null || player == null || map == null)
             {
-                Debug.LogError("[Run] Exploration scene is missing inventory or tasks.");
+                Debug.LogError("[Run] Exploration scene is missing inventory, tasks, player, or map.");
                 enabled = false;
                 return;
             }
             foreach (int id in RunProgress.WeaponIds())
                 inventory.Add(id, RunProgress.Icon(id), RunProgress.Name(id));
             if (RunProgress.ExplorationCompleted(carriage)) tasks.RestoreObserveTaskCompleted();
+            if (carriage == 3 && FindObjectOfType<ExplorationBeatWeirdness>() == null)
+                gameObject.AddComponent<ExplorationBeatWeirdness>();
+        }
+
+        private void Update()
+        {
+            if (carriage == 0 || leaving || SpotlightSceneTransition.IsTransitioning) return;
+            if (!RunProgress.ExplorationCompleted(carriage)) return;
+
+            if (!exitReady)
+            {
+                exitReady = true;
+                if (!tasks.ObserveTaskCompleted) tasks.CompleteObserveTask();
+                hint?.Show("怪异已完成。前往车厢最右端，按 E 进入战斗。");
+            }
+
+            if (story != null && story.IsPlaying) return;
+            if (!player.ControlEnabled || player.IsMoving ||
+                player.CurrentColumn != map.CellCount - 1 || !Input.GetKeyDown(KeyCode.E)) return;
+
+            leaving = SpotlightSceneTransition.TryLoad("fight_" + carriage,
+                onFailure: error =>
+                {
+                    leaving = false;
+                    Debug.LogError("[Run] " + error, this);
+                });
+            if (!leaving) Debug.LogError("[Run] Could not load fight_" + carriage + ".", this);
         }
 
         private void OnDestroy()

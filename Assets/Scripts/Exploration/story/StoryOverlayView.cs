@@ -224,6 +224,7 @@ namespace Spotlight.Exploration
                 Input.GetKeyDown(KeyCode.Return) ||
                 Input.GetKeyDown(KeyCode.KeypadEnter))
             {
+                if (Input.GetMouseButtonDown(0)) Spotlight.UISoundPlayer.PlayClickOncePerFrame();
                 ContinueRequested?.Invoke();
             }
         }
@@ -274,6 +275,7 @@ namespace Spotlight.Exploration
             }
 
             choiceMode = false;
+            Spotlight.UISoundPlayer.PlayClickOncePerFrame();
             ChoiceSelected?.Invoke(index);
         }
 

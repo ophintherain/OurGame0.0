@@ -20,6 +20,7 @@ namespace Spotlight.Battle
         private Coroutine hitPause;
         private float pauseOriginalScale = 1f;
         private float lastDamageSoundTime = -100f;
+        private float lastBossDamageSoundTime = -100f;
 
         public void Configure(BattleCoordinator coordinator, PlayerBattleController battlePlayer,
             BossController battleBoss, WeaponController weaponController, BattleCameraRig rig)
@@ -91,6 +92,7 @@ namespace Spotlight.Battle
                 boss.AttackResolved += OnAttackResolved;
             }
             if (weapons != null) weapons.WeaponUsed += OnWeaponUsed;
+            if (player != null) player.PostureChanged += OnPostureChanged;
         }
 
         private void Unsubscribe()
@@ -103,6 +105,13 @@ namespace Spotlight.Battle
                 boss.AttackResolved -= OnAttackResolved;
             }
             if (weapons != null) weapons.WeaponUsed -= OnWeaponUsed;
+            if (player != null) player.PostureChanged -= OnPostureChanged;
+        }
+
+        private static void OnPostureChanged(PlayerPosture previous, PlayerPosture current)
+        {
+            UISoundPlayer.Play(UISoundCue.PageTurn);
+            UISoundPlayer.Play(UISoundCue.SwitchAction);
         }
 
         private void OnPlayerHealthChanged(float previous, float current)
@@ -110,7 +119,7 @@ namespace Spotlight.Battle
             if (battle == null || !battle.IsBattleActive || current >= previous) return;
             if (Time.unscaledTime - lastDamageSoundTime > 0.2f)
             {
-                UISoundPlayer.Play(UISoundCue.ExplorationDamage);
+                BattleSoundPlayer.Play("角色受击");
                 lastDamageSoundTime = Time.unscaledTime;
             }
             playerFlash = 0.16f;
@@ -122,6 +131,11 @@ namespace Spotlight.Battle
         private void OnBossHealthChanged(float previous, float current)
         {
             if (battle == null || !battle.IsBattleActive || current >= previous) return;
+            if (Time.unscaledTime - lastBossDamageSoundTime > 0.2f)
+            {
+                BattleSoundPlayer.Play("boss受击");
+                lastBossDamageSoundTime = Time.unscaledTime;
+            }
             bossFlash = 0.12f;
             cameraRig?.RequestImpact(previous - current >= boss.Health.MaxHealth * 0.05f ? 0.1f : 0.035f);
             SpawnBurst(boss.transform.position, new Color(1f, 0.75f, 0.35f));
@@ -192,6 +206,58 @@ namespace Spotlight.Battle
             renderer.sortingOrder = 30;
             particles.Emit(9);
             Object.Destroy(burst, 0.6f);
+        }
+    }
+
+    // These clips are shared by all three fights and the isolated skill test scene.
+    internal static class BattleSoundPlayer
+    {
+        private static readonly System.Collections.Generic.Dictionary<string, AudioClip> clips =
+            new System.Collections.Generic.Dictionary<string, AudioClip>();
+        private static AudioSource source;
+
+        public static void PlayWeapon(WeaponSkill skill)
+        {
+            string clip = skill switch
+            {
+                WeaponSkill.Truce => "1 调停v4",
+                WeaponSkill.Needle => "2 针刺",
+                WeaponSkill.Leap => "3 跃迁",
+                WeaponSkill.Mimic => "4 归我",
+                WeaponSkill.Poet => "5 诗者",
+                WeaponSkill.Barrage => "6弹雨",
+                WeaponSkill.Servitude => "7 附庸",
+                WeaponSkill.Edge => "8 夺锋",
+                WeaponSkill.Recorder => "9 记录者",
+                _ => null
+            };
+            Play(clip);
+        }
+
+        public static void PlayBossSkill(int carriage)
+        {
+            Play(carriage == 1 ? "车厢1 boss技能" : carriage == 2 ? "boss2技能" : "车厢3boss技能");
+        }
+
+        public static void Play(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            if (!clips.TryGetValue(name, out AudioClip clip) || clip == null)
+            {
+                clip = Resources.Load<AudioClip>("BattleAudio/" + name);
+                clips[name] = clip;
+            }
+            if (clip == null) return;
+            if (source == null)
+            {
+                var holder = new GameObject("BattleSoundPlayer");
+                Object.DontDestroyOnLoad(holder);
+                source = holder.AddComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.spatialBlend = 0f;
+                source.volume = 0.7f;
+            }
+            source.PlayOneShot(clip);
         }
     }
 }

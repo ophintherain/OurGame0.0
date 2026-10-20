@@ -190,6 +190,7 @@ namespace Spotlight.Exploration
 
         private void Trigger(ExplorationPoint point)
         {
+            Spotlight.UISoundPlayer.PlayClickOncePerFrame();
             string pointLabel = $"位置 ({point.position.x:0.##}, {point.position.y:0.##})";
 
             switch (point.type)

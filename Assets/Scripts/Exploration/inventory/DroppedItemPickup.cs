@@ -85,6 +85,7 @@ namespace Spotlight.Exploration
 
             if (inventory.Add(itemId, icon, displayName, description))
             {
+                Spotlight.UISoundPlayer.PlayClickOncePerFrame();
                 collected = true;
                 Destroy(gameObject);
             }

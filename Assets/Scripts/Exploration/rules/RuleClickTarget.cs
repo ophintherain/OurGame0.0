@@ -86,6 +86,7 @@ namespace Spotlight.Exploration
                 return;
             }
 
+            Spotlight.UISoundPlayer.PlayClickOncePerFrame();
             Clicked?.Invoke(key, transform.position);
         }
 

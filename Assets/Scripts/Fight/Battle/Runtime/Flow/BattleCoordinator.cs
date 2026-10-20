@@ -28,7 +28,10 @@ namespace Spotlight.Battle
 
         public bool IsBattleActive { get; private set; }
         public bool IsLoadoutSelectionOpen { get; private set; }
+        public float PlayerHealthNormalized => player != null && player.Health != null
+            ? player.Health.Normalized : 1f;
         public bool IsRetryPromptOpen { get; private set; }
+        public bool IsVictoryEffectPlaying { get; private set; }
         public BattleResult LastResult { get; private set; }
         public bool HasPendingWeaponDiscard => LastResult.RequiresWeaponDiscard;
         public System.Collections.Generic.IReadOnlyList<CoverController> Covers => covers ?? Array.Empty<CoverController>();
@@ -107,6 +110,7 @@ namespace Spotlight.Battle
             weapons?.BeginBattle();
             LastResult = default;
             IsRetryPromptOpen = false;
+            IsVictoryEffectPlaying = false;
             IsBattleActive = true;
             BattleHitFeedback feedback = GetComponent<BattleHitFeedback>();
             if (feedback == null) feedback = gameObject.AddComponent<BattleHitFeedback>();
@@ -241,6 +245,15 @@ namespace Spotlight.Battle
                 weapons?.ConfigureCarriage(boss.CarriageIndex);
                 if (SceneManager.GetActiveScene().name != "fight_test")
                 {
+                    // Directly opening a fight scene for testing has no exploration run.
+                    if (!RunProgress.Active)
+                    {
+                        RunProgress.Begin();
+                        RunProgress.SetCarriage(boss.CarriageIndex);
+                        RunProgress.AddWeapon(1001);
+                        RunProgress.AddWeapon(1002);
+                        RunProgress.AddWeapon(1006);
+                    }
                     weapons?.ApplyRunInventory();
                     gameObject.AddComponent<BattleRunBridge>().Initialize(this, boss);
                 }
@@ -250,7 +263,7 @@ namespace Spotlight.Battle
                 if (screen == null) screen = gameObject.AddComponent<BattleLoadoutScreen>();
                 screen.Configure(this, weapons, boss, GetComponent<BattleStatusHUD>());
                 if (SceneManager.GetActiveScene().name == "fight_test" ||
-                    !gameObject.AddComponent<BattleStoryBridge>().Initialize(this, boss.CarriageIndex))
+                    !gameObject.AddComponent<BattleStoryBridge>().Initialize(this, boss))
                     IsLoadoutSelectionOpen = true;
                 yield break;
             }
@@ -270,6 +283,11 @@ namespace Spotlight.Battle
             if (fightSceneLoadout && !IsBattleActive && !IsRetryPromptOpen &&
                 !LastResult.RequiresWeaponDiscard)
                 IsLoadoutSelectionOpen = true;
+        }
+
+        public void CompleteVictoryEffect()
+        {
+            IsVictoryEffectPlaying = false;
         }
 
         private void OnEnable()
@@ -332,8 +350,8 @@ namespace Spotlight.Battle
             IsBattleActive = false;
             player.EndBattle();
             boss.EndBattle();
-            if (outcome == BattleOutcome.BossDefeated)
-                boss.HideAfterDefeat();
+            IsVictoryEffectPlaying = outcome == BattleOutcome.BossDefeated && fightSceneLoadout &&
+                SceneManager.GetActiveScene().name != "fight_test";
             weapons?.EndBattle();
             float playerHealth = player.Health != null ? player.Health.CurrentHealth : 0f;
             bool needsDiscard = outcome == BattleOutcome.BossDefeated && player.Health != null &&

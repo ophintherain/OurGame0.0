@@ -8,15 +8,17 @@ namespace Spotlight.Battle
     public sealed class BattleStoryBridge : MonoBehaviour
     {
         private BattleCoordinator battle;
+        private BossController boss;
         private MonoBehaviour story;
         private MethodInfo play;
         private PropertyInfo isPlaying;
         private int carriage;
 
-        public bool Initialize(BattleCoordinator coordinator, int carriageIndex)
+        public bool Initialize(BattleCoordinator coordinator, BossController controller)
         {
             battle = coordinator;
-            carriage = carriageIndex;
+            boss = controller;
+            carriage = controller != null ? controller.CarriageIndex : 1;
             foreach (MonoBehaviour component in FindObjectsOfType<MonoBehaviour>())
             {
                 if (component.GetType().FullName != "Spotlight.Exploration.StoryDirector")
@@ -41,6 +43,7 @@ namespace Spotlight.Battle
                     component.enabled = false;
             }
 
+            if (carriage == 2) boss?.SetStoryVisible(false);
             StartCoroutine(PlayBeforeBattle());
             return true;
         }
@@ -51,6 +54,7 @@ namespace Spotlight.Battle
             // Only the second monster has entrance dialogue in the story sheet.
             // The other chapters' exploration narration and broadcasts are not monster lines.
             if (carriage == 2) yield return PlayAndWait("boss2_pre");
+            if (carriage == 2) boss?.SetStoryVisible(true);
             if (battle != null) battle.OpenInitialLoadoutAfterStory();
         }
 

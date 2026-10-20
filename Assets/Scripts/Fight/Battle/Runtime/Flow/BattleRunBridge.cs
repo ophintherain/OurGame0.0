@@ -28,19 +28,23 @@ namespace Spotlight.Battle
             if (loading) return;
             if (result.Outcome == BattleOutcome.PlayerDead) return; // Retry prompt handles the choice.
             if (result.Outcome == BattleOutcome.Escaped)
-                StartCoroutine(LoadAfterResult(ExploreScene(boss.CarriageIndex)));
+                StartCoroutine(LoadAfterResult(ExploreScene(boss.CarriageIndex), false));
             else if (result.Outcome == BattleOutcome.BossDefeated)
                 StartCoroutine(LoadAfterResult(boss.CarriageIndex == 3 ? "ending" :
-                    ExploreScene(boss.CarriageIndex + 1)));
+                    ExploreScene(boss.CarriageIndex + 1), true));
         }
 
-        private IEnumerator LoadAfterResult(string scene)
+        private IEnumerator LoadAfterResult(string scene, bool bossDefeated)
         {
             loading = true;
-            yield return null;
+            if (bossDefeated && boss != null)
+            {
+                yield return boss.PlayDefeatDissolve(0.75f);
+                battle?.CompleteVictoryEffect();
+            }
             while (battle != null && battle.HasPendingWeaponDiscard) yield return null;
             if (battle == null) yield break;
-            if (scene != ExploreScene(boss.CarriageIndex))
+            if (bossDefeated)
             {
                 BattleStoryBridge story = GetComponent<BattleStoryBridge>();
                 if (story != null) yield return story.PlayAfterVictory();

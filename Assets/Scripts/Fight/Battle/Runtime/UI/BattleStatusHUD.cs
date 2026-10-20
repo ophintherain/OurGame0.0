@@ -127,7 +127,7 @@ namespace Spotlight.Battle
                 PlayerPortraitPixels);
             DrawHealthBar(new Rect(playerBarX, 24f, barWidth, 33f), player.Health);
             DrawOverview(left, mapWidth);
-            DrawWeaponSlots();
+            if (battle.IsBattleActive) DrawWeaponSlots();
             GUI.color = oldColor;
             GUI.depth = oldDepth;
         }
