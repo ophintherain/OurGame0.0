@@ -48,13 +48,9 @@ namespace Spotlight.Battle
         private IEnumerator PlayBeforeBattle()
         {
             yield return null; // The loadout UI and StoryOverlay finish initialization first.
-            // Carriage 1 is explicitly marked silent before the fight in the story sheet.
-            // ch1_rule_06 is an exploration broadcast, not monster entrance dialogue.
-            if (carriage != 1)
-            {
-                string id = carriage == 2 ? "boss2_pre" : "ch3_02_boss_appear";
-                yield return PlayAndWait(id);
-            }
+            // Only the second monster has entrance dialogue in the story sheet.
+            // The other chapters' exploration narration and broadcasts are not monster lines.
+            if (carriage == 2) yield return PlayAndWait("boss2_pre");
             if (battle != null) battle.OpenInitialLoadoutAfterStory();
         }
 
