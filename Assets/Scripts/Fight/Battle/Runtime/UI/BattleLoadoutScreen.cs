@@ -12,9 +12,12 @@ namespace Spotlight.Battle
         private static readonly Color Panel = new Color(0.20f, 0.145f, 0.13f);
         private static readonly Color Gold = new Color(0.82f, 0.63f, 0.38f);
         private static readonly Color Ivory = new Color(0.98f, 0.91f, 0.78f);
+        private static readonly Rect RetryConfirmUv = new Rect(1128f / 3000f,
+            (1688f - 1479f) / 1688f, 402f / 3000f, 183f / 1688f);
         private BattleCoordinator battle;
         private WeaponController weapons;
         private BattleStatusHUD hud;
+        private Texture2D retryConfirm;
 
         public void Configure(BattleCoordinator coordinator, WeaponController weaponController,
             BossController battleBoss, BattleStatusHUD statusHud)
@@ -22,11 +25,29 @@ namespace Spotlight.Battle
             battle = coordinator;
             weapons = weaponController;
             hud = statusHud;
+            Sprite confirmSprite = Resources.Load<Sprite>("RetryConfirm");
+            retryConfirm = confirmSprite != null ? confirmSprite.texture : null;
+        }
+
+        private void Update()
+        {
+            if (battle != null && battle.IsRetryPromptOpen &&
+                (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+            {
+                UISoundPlayer.Play(UISoundCue.Click);
+                battle.TryConfirmRetry();
+            }
         }
 
         private void OnGUI()
         {
-            if (battle == null || weapons == null || !battle.IsLoadoutSelectionOpen) return;
+            if (battle == null || weapons == null) return;
+            if (battle.IsRetryPromptOpen)
+            {
+                DrawRetryPrompt();
+                return;
+            }
+            if (!battle.IsLoadoutSelectionOpen) return;
 
             int oldDepth = GUI.depth;
             Matrix4x4 oldMatrix = GUI.matrix;
@@ -47,6 +68,44 @@ namespace Spotlight.Battle
             DrawConfirm();
             DrawInventory();
             if (battle.HasPendingWeaponDiscard) DrawDiscardPrompt();
+
+            GUI.color = oldColor;
+            GUI.matrix = oldMatrix;
+            GUI.depth = oldDepth;
+        }
+
+        private void DrawRetryPrompt()
+        {
+            int oldDepth = GUI.depth;
+            Matrix4x4 oldMatrix = GUI.matrix;
+            Color oldColor = GUI.color;
+            GUI.depth = -200;
+            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0f, 0f, 0f, 0.82f));
+            float scale = Mathf.Min(Screen.width / DesignWidth, Screen.height / DesignHeight);
+            GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - DesignWidth * scale) / 2f,
+                (Screen.height - DesignHeight * scale) / 2f, 0f), Quaternion.identity,
+                new Vector3(scale, scale, 1f));
+
+            Rect panel = new Rect(112f, 82f, 400f, 208f);
+            Fill(panel, Panel);
+            Border(panel, 2f, Gold);
+            GUI.Label(new Rect(132f, 112f, 360f, 42f), "重新挑战？",
+                LabelStyle(28, TextAnchor.MiddleCenter, Ivory));
+            GUI.Label(new Rect(132f, 153f, 360f, 28f), "确认后重新选择武器",
+                LabelStyle(15, TextAnchor.MiddleCenter, Ivory));
+            Rect button = new Rect(242f, 202f, 140f, 64f);
+            if (retryConfirm != null)
+                GUI.DrawTextureWithTexCoords(button, retryConfirm, RetryConfirmUv, true);
+            else
+            {
+                Fill(button, Gold);
+                GUI.Label(button, "确认", LabelStyle(20, TextAnchor.MiddleCenter, Background));
+            }
+            if (GUI.Button(button, GUIContent.none, GUIStyle.none))
+            {
+                UISoundPlayer.Play(UISoundCue.Click);
+                battle.TryConfirmRetry();
+            }
 
             GUI.color = oldColor;
             GUI.matrix = oldMatrix;

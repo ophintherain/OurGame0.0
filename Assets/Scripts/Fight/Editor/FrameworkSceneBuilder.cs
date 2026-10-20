@@ -180,6 +180,13 @@ namespace Spotlight.Editor
             battlePlayer.ConfigureArtwork(
                 AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001b.png"),
                 AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/4001a.png"));
+            var walkingFrames = new Sprite[5];
+            for (int frame = 0; frame < walkingFrames.Length; frame++)
+                walkingFrames[frame] = AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder +
+                    $"/Player/Animations/7002b/7002b_{frame:0000}.png");
+            battlePlayer.ConfigurePoseArtwork(walkingFrames,
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/Animations/7002c/7002c_0000.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtworkFolder + "/Player/Animations/7002a/7002a_0000.png"));
 
             GameObject battleVisualRoot = NewChild(world, "BattleEnvironment");
             CreateArtwork("BattleBackground", battleVisualRoot.transform, ArtworkFolder + "/Background/10011a.png",
