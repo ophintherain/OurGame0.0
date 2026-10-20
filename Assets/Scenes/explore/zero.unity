@@ -1201,17 +1201,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 813593653}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1366679729}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 140, y: 210}
-  m_SizeDelta: {x: 220, y: 320}
+  m_AnchoredPosition: {x: 1420, y: -185.11}
+  m_SizeDelta: {x: 805.336, y: 1292.801}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &813593655
 CanvasRenderer:
@@ -1234,7 +1234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.15}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1816,7 +1816,12 @@ MonoBehaviour:
   standingVisual: {fileID: 4619424972080206828, guid: ea552d2638b09e140a66fe6310b6789e, type: 3}
   proneVisual: {fileID: 4619424972080206828, guid: ea552d2638b09e140a66fe6310b6789e, type: 3}
   placeholderVisual: {fileID: 1000000033}
-  standingMoveFrames: []
+  standingMoveFrames:
+  - {fileID: 21300000, guid: 65bf73e57d604153ab461da08acd6b8a, type: 3}
+  - {fileID: 21300000, guid: edfeeb3c23194bb49c324df582a97ae6, type: 3}
+  - {fileID: 21300000, guid: 2e210e054209419ab5f6b078c5d24e0a, type: 3}
+  - {fileID: 21300000, guid: af869b049e044d0f9a1fafa211973174, type: 3}
+  - {fileID: 21300000, guid: 9b9863b689ad44c6a5bf30530d3d738b, type: 3}
   proneMoveFrames: []
   moveFramesPerSecond: 8
   proneVisualOffset: {x: 0, y: -0.8}
@@ -1900,7 +1905,7 @@ MonoBehaviour:
     itemId: 0
     icon: {fileID: 0}
     displayName: "\u4E4C\u9E26\u73A9\u5076"
-    hintText: "\u5931\u53BB\u773C\u775B\u7684\u4E4C\u9E26\u73A9\u5076 \u7834\u65E7\u7684\u73A9\u5076\u5931\u53BB\u4E86\u5B83\u539F\u6709\u7684\u9B45\u529B\uFF0C\u672C\u8BE5\u9576\u5D4C\u773C\u775B\u7684\u5730\u65B9\uFF0C\u88AB\u4EBA\u4E3A\u6316\u51FA\u3002\u672C\u5C31\u662F\u8FC7\u65F6\u7684\u6B3E\u5F0F\uFF0C\u5982\u4ECA\u5931\u53BB\u773C\u775B\u7684\u73A9\u5076\u66F4\u662F\u65E0\u4EBA\u95EE\u6D25\u3002\u5C3E\u7FBD\u6807\u7B7E\u5904\u6709\u4E00\u53E5\u6781\u77ED\u7684\u795D\u798F\u201C\u5C0F\u7FBD\uFF0C\u751F\u65E5\u5FEB\u4E50\u3002\u201D"
+    hintText: 
     storyId: ch1_03_doll
   rowHeight: 1.4
   highlightSortingOrder: 20
@@ -2145,7 +2150,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1366679729
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2158,10 +2163,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 813593654}
   - {fileID: 482084069}
   - {fileID: 467891457}
   - {fileID: 2160963}
+  - {fileID: 813593654}
   m_Father: {fileID: 1711266986}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
@@ -2220,6 +2225,7 @@ GameObject:
   - component: {fileID: 1568199699}
   - component: {fileID: 1568199698}
   - component: {fileID: 1568199701}
+  - component: {fileID: 1568199702}
   m_Layer: 0
   m_Name: StorySystem
   m_TagString: Untagged
@@ -2264,10 +2270,12 @@ MonoBehaviour:
   backpackPanel: {fileID: 0}
   taskPanel: {fileID: 0}
   interactables: {fileID: 1000000062}
-  portraitSet: {fileID: 0}
-  audioSet: {fileID: 0}
+  portraitSet: {fileID: 11400000, guid: 4f6e8a2c9d1b43f7a5c0e2b8d6f1437a, type: 2}
+  audioSet: {fileID: 11400000, guid: 9f8e7d6c5b4a39281706f5e4d3c2b1a0, type: 2}
   audioSource: {fileID: 1568199700}
   audioVolume: 1
+  ambientSource: {fileID: 1568199700}
+  ambientFadeDuration: 0.5
   playerDisplayName: "#\u73A9\u5BB6\u540D#"
   censorReplacement: "**\u6587\u660E\u7528\u8BED**"
   areaTriggers: []
@@ -2302,6 +2310,7 @@ MonoBehaviour:
   narrationText: {fileID: 936925445}
   topHintText: {fileID: 932409732}
   portraitImage: {fileID: 813593656}
+  portraitSpacing: 0.08
   continueHint: {fileID: 2160960}
   choiceButtonTemplate: {fileID: 1787673267}
   normalHintColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2423,6 +2432,22 @@ MonoBehaviour:
     - ch1_hint_04_interact
     - ch1_hint_05_observe
     - ch1_04_explore_start
+--- !u!114 &1568199702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568199696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a1d4f7b2c9e4385a0b7d6e5f4c3b2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clip: {fileID: 8300000, guid: 3a36e06e7ae04ef2a31ccf5776519639, type: 3}
+  volume: 0.45
+  fadeInSeconds: 1
+  loop: 1
 --- !u!1 &1711266985
 GameObject:
   m_ObjectHideFlags: 0
@@ -2438,7 +2463,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1711266986
 RectTransform:
   m_ObjectHideFlags: 0

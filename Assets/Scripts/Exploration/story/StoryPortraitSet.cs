@@ -8,7 +8,7 @@ namespace Spotlight.Exploration
     [Serializable]
     public sealed class StoryPortraitEntry
     {
-        [Tooltip("立绘 key，对应 Excel 推断出的 portraitKey（如 firefeather / snowdoll / researcher / player）")]
+        [Tooltip("立绘 key，对应剧情行里的 portraitKey（如 玩家 / 狄斯 / ？？）")]
         public string key;
 
         [Tooltip("该 key 对应的立绘图片。留空时该角色不显示立绘")]

@@ -56,6 +56,34 @@ namespace Spotlight.Exploration
         [Tooltip("键盘开关背包的按键，默认 B")]
         private KeyCode toggleKey = KeyCode.B;
 
+        [SerializeField, Min(0f)]
+        [Tooltip("右键放下物品的落点：相对地图地面的高度偏移。0.7 = 站立时脚底到角色轴心的距离；数值越大物品放得越低，默认 1.2")]
+        private float dropFootOffset = 1.2f;
+
+        [SerializeField, Min(0.05f)]
+        [Tooltip("右键放下物品的立绘最大边长（世界单位）。数值越小掉落物越小，点击范围会同步变小")]
+        private float dropVisualHeight = 0.7f;
+
+        [SerializeField]
+        [Tooltip("放下物品的 Sorting Order。默认 20，与场景里的可探索点一致；数值越大越靠前")]
+        private int dropSortingOrder = 20;
+
+        [SerializeField]
+        [Tooltip("打开背包时播放的音效。直接把音频文件拖进来；留空则不播")]
+        private AudioClip openSound;
+
+        [SerializeField]
+        [Tooltip("关闭背包时播放的音效。直接把音频文件拖进来；留空则不播")]
+        private AudioClip closeSound;
+
+        [SerializeField, Range(0f, 1f)]
+        [Tooltip("背包开关音效的音量 0~1。0 = 静音，1 = 原始音量")]
+        private float soundVolume = 1f;
+
+        [SerializeField]
+        [Tooltip("播放背包开关音效的 AudioSource。留空会自动取同一个物体上的组件，没有则自动添加；一般不需要手动拖")]
+        private AudioSource soundSource;
+
         /// <summary>面板是否处于打开状态。</summary>
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
 
@@ -68,6 +96,7 @@ namespace Spotlight.Exploration
         private Image buttonImage;
         private Sprite defaultButtonIcon;
         private bool interactionEnabled = true;
+        private ExplorationMap map;
 
         private void Awake()
         {
@@ -101,11 +130,27 @@ namespace Spotlight.Exploration
                 }
             }
 
+            map ??= FindObjectOfType<ExplorationMap>();
+
+            if (soundSource == null)
+            {
+                soundSource = GetComponent<AudioSource>();
+                if (soundSource == null)
+                {
+                    soundSource = gameObject.AddComponent<AudioSource>();
+                }
+            }
+
+            soundSource.playOnAwake = false;
+            soundSource.spatialBlend = 0f;
+
             NormalizeGridScale(weaponGridRoot);
             NormalizeGridScale(itemGridRoot);
 
             weaponCells = CollectCells(weaponGridRoot);
             itemCells = CollectCells(itemGridRoot);
+            SubscribeCellClicks(weaponCells);
+            SubscribeCellClicks(itemCells);
 
             if (btnWeaponTab != null)
             {
@@ -136,6 +181,9 @@ namespace Spotlight.Exploration
             {
                 inventory.Changed -= OnInventoryChanged;
             }
+
+            UnsubscribeCellClicks(weaponCells);
+            UnsubscribeCellClicks(itemCells);
         }
 
         private void Update()
@@ -165,8 +213,14 @@ namespace Spotlight.Exploration
         /// <summary>打开 / 关闭背包。打开时锁住角色移动，并按当前页签刷新。</summary>
         public void SetOpen(bool open)
         {
+            bool stateChanged = panelRoot.activeSelf != open;
             panelRoot.SetActive(open);
             UpdateButtonIcon(open);
+
+            if (stateChanged)
+            {
+                PlayToggleSound(open);
+            }
 
             if (player != null)
             {
@@ -179,6 +233,18 @@ namespace Spotlight.Exploration
             }
 
             OpenStateChanged?.Invoke(open);
+        }
+
+        /// <summary>播放打开 / 关闭背包音效；没有配置对应音频时静默。</summary>
+        private void PlayToggleSound(bool open)
+        {
+            AudioClip clip = open ? openSound : closeSound;
+            if (clip == null || soundSource == null)
+            {
+                return;
+            }
+
+            soundSource.PlayOneShot(clip, Mathf.Clamp01(soundVolume));
         }
 
         /// <summary>切换 HUD 按钮图标：打开用 openedButtonIcon，关闭用 closedButtonIcon（留空则回退到原图标）。</summary>
@@ -244,6 +310,71 @@ namespace Spotlight.Exploration
             }
         }
 
+        private void SubscribeCellClicks(InventoryCellView[] cells)
+        {
+            if (cells == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < cells.Length; index++)
+            {
+                if (cells[index] != null)
+                {
+                    cells[index].RightClicked += OnCellRightClicked;
+                }
+            }
+        }
+
+        private void UnsubscribeCellClicks(InventoryCellView[] cells)
+        {
+            if (cells == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < cells.Length; index++)
+            {
+                if (cells[index] != null)
+                {
+                    cells[index].RightClicked -= OnCellRightClicked;
+                }
+            }
+        }
+
+        /// <summary>右键格子：物品类（2000~2999）从背包放下；武器不可放。</summary>
+        private void OnCellRightClicked(InventoryEntry entry)
+        {
+            if (entry == null || entry.Kind != InventoryItemKind.Item)
+            {
+                return;
+            }
+
+            if (inventory.Remove(entry.Id))
+            {
+                SpawnDroppedItem(entry);
+            }
+        }
+
+        /// <summary>把放下的物品生成在角色站立时的脚部位置；点击可重新拾取。</summary>
+        private void SpawnDroppedItem(InventoryEntry entry)
+        {
+            Vector3 position = player != null ? player.transform.position : transform.position;
+            float groundY = map != null ? map.GroundY : position.y;
+            position.y = groundY - dropFootOffset;
+            position.z = 0f;
+
+            GameObject dropped = new GameObject($"Dropped_{entry.Id}");
+            dropped.transform.position = position;
+
+            SpriteRenderer renderer = dropped.AddComponent<SpriteRenderer>();
+            renderer.sprite = entry.Icon;
+            renderer.sortingOrder = dropSortingOrder;
+
+            DroppedItemPickup pickup = dropped.AddComponent<DroppedItemPickup>();
+            pickup.Configure(inventory, entry.Id, entry.Icon, entry.DisplayName, dropVisualHeight);
+        }
+
         /// <summary>
         /// GridLayoutGroup 按未缩放的矩形排布子物体，容器一旦有缩放，格子会被整体放大并推到面板外。
         /// 这里把容器缩放还原为 1；需要的视觉大小应改到 Cell Size 或格子自身的 Scale 上。
@@ -286,6 +417,14 @@ namespace Spotlight.Exploration
             for (int i = 0; i < images.Length; i++)
             {
                 Image image = images[i];
+
+                // 背包格子自身需要接收右键放下，不能被当成装饰图关掉
+                if (image.GetComponent<InventoryCellView>() != null)
+                {
+                    image.raycastTarget = true;
+                    continue;
+                }
+
                 if (image.GetComponent<Button>() != null || image.GetComponentInParent<Button>(true) != null)
                 {
                     continue;

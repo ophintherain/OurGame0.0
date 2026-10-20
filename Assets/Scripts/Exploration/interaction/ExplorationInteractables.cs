@@ -54,6 +54,7 @@ namespace Spotlight.Exploration
         {
             public ExplorationPoint Point;
             public SpriteRenderer Renderer;
+            public bool Collected;
         }
 
         private readonly List<PointRuntime> runtimePoints = new List<PointRuntime>();
@@ -88,6 +89,49 @@ namespace Spotlight.Exploration
             }
 
             CreatePointVisuals();
+
+            if (inventory != null)
+            {
+                inventory.Changed += OnInventoryChanged;
+                HideOwnedPoints();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (inventory != null)
+            {
+                inventory.Changed -= OnInventoryChanged;
+            }
+        }
+
+        /// <summary>背包变化时，把已经拥有的物品对应的交互点隐藏（不管物品是从哪来的）。</summary>
+        private void OnInventoryChanged()
+        {
+            HideOwnedPoints();
+        }
+
+        private void HideOwnedPoints()
+        {
+            if (inventory == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < runtimePoints.Count; index++)
+            {
+                PointRuntime entry = runtimePoints[index];
+                if (entry.Collected || entry.Point == null ||
+                    entry.Point.type != ExplorationPointType.Item)
+                {
+                    continue;
+                }
+
+                if (inventory.Contains(entry.Point.itemId))
+                {
+                    HidePoint(entry.Point);
+                }
+            }
         }
 
         private void Update()
@@ -125,7 +169,7 @@ namespace Spotlight.Exploration
             for (int index = runtimePoints.Count - 1; index >= 0; index--)
             {
                 PointRuntime entry = runtimePoints[index];
-                if (entry.Renderer == null)
+                if (entry.Renderer == null || entry.Collected)
                 {
                     continue;
                 }
@@ -157,13 +201,20 @@ namespace Spotlight.Exploration
                         break;
                     }
 
-                    if (!inventory.Add(point.itemId, point.icon, point.displayName))
-                    {
-                        Debug.Log($"[Exploration] 物品 {point.itemId} 未加入背包（已拥有或 ID 不合法）。");
-                    }
-                    else if (hintPanel != null && !string.IsNullOrWhiteSpace(point.hintText))
+                    bool added = inventory.Add(point.itemId, point.icon, point.displayName);
+                    if (added && hintPanel != null && !string.IsNullOrWhiteSpace(point.hintText))
                     {
                         hintPanel.Show(point.hintText);
+                    }
+
+                    // 背包变化事件里会统一隐藏；这里再兜底一次
+                    if (inventory.Contains(point.itemId))
+                    {
+                        HidePoint(point);
+                    }
+                    else
+                    {
+                        Debug.Log($"[Exploration] 物品 {point.itemId} 未加入背包（ID 不合法）。");
                     }
 
                     break;
@@ -180,6 +231,36 @@ namespace Spotlight.Exploration
             }
 
             PointTriggered?.Invoke(point);
+        }
+
+        /// <summary>物品被拿走后隐藏立绘与点击区域，之后不再响应点击。</summary>
+        private void HidePoint(ExplorationPoint point)
+        {
+            for (int index = 0; index < runtimePoints.Count; index++)
+            {
+                PointRuntime entry = runtimePoints[index];
+                if (entry.Point != point)
+                {
+                    continue;
+                }
+
+                if (entry.Collected)
+                {
+                    return;
+                }
+
+                entry.Collected = true;
+                if (entry.Renderer != null)
+                {
+                    entry.Renderer.gameObject.SetActive(false);
+                }
+
+                Debug.Log(
+                    $"[Exploration] 物品 {point.itemId} 已入手，隐藏交互点 ({point.position.x:0.##}, {point.position.y:0.##})。",
+                    this);
+
+                return;
+            }
         }
 
         /// <summary>
@@ -224,7 +305,7 @@ namespace Spotlight.Exploration
                     visualObject.transform.localScale = new Vector3(map.CellSpacing * scale, rowHeight * scale, 1f);
                 }
 
-                runtimePoints.Add(new PointRuntime { Point = point, Renderer = renderer });
+                runtimePoints.Add(new PointRuntime { Point = point, Renderer = renderer, Collected = false });
             }
         }
 

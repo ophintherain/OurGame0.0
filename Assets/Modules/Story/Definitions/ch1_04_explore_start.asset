@@ -22,7 +22,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u627E\u5230\u6211\uFF0C\u6D88\u706D\u6211\u3002"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\u9ED1\u9E1F"
     audioCue: 
     stageNote: "\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71"
     sceneTag: 1001
