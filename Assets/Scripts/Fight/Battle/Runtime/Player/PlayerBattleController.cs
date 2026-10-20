@@ -10,10 +10,14 @@ namespace Spotlight.Battle
         [SerializeField] private BattleLane startingLane = BattleLane.Corridor;
         [SerializeField] private int startingColumn = 8;
         [SerializeField] private float onTableVisualOffsetY = 2f;
-        [SerializeField] private float backgroundTableVisualOffsetY = 1.5f;
+        [SerializeField] private float backgroundTableVisualOffsetY = 2.04f;
+        [SerializeField] private float foregroundStandingVisualOffsetY = 0.18f;
         [SerializeField] private float proneVisualOffsetY = -0.3f;
         [SerializeField] private Sprite idleArtwork;
         [SerializeField] private Sprite castingArtwork;
+        [SerializeField] private Sprite[] walkingArtwork;
+        [SerializeField] private Sprite onTableArtwork;
+        [SerializeField] private Sprite proneArtwork;
         [SerializeField] private float castingPoseDuration = 0.32f;
 
         private SpriteRenderer spriteRenderer;
@@ -23,6 +27,9 @@ namespace Spotlight.Battle
         private const float ForegroundArtworkDropY = -0.07f;
         private const float BackgroundArtworkDropY = 0.7f;
         private const float ArtworkFootOffsetY = 2.14f;
+        // The new poses use different canvas heights; these offsets keep their visible feet aligned.
+        private const float OnTableArtworkOffsetY = -0.42f;
+        private const float ProneArtworkOffsetY = -1.22f;
         private int standingSortingOrder;
         private float stunRemaining;
         private float invulnerabilityRemaining;
@@ -59,6 +66,13 @@ namespace Spotlight.Battle
         {
             idleArtwork = idle;
             castingArtwork = casting;
+        }
+
+        public void ConfigurePoseArtwork(Sprite[] walking, Sprite onTable, Sprite prone)
+        {
+            walkingArtwork = walking;
+            onTableArtwork = onTable;
+            proneArtwork = prone;
         }
 
         public void BeginBattle()
@@ -238,7 +252,7 @@ namespace Spotlight.Battle
             Vector3 scale = Vector3.one;
             if (Posture == PlayerPosture.Prone)
             {
-                scale = new Vector3(1.25f, 0.5f, 1f);
+                scale = new Vector3(0.8f, 0.8f, 1f);
                 position.y += proneVisualOffsetY;
             }
             else if (Posture == PlayerPosture.OnTable)
@@ -246,6 +260,10 @@ namespace Spotlight.Battle
                 scale = new Vector3(0.85f, 0.85f, 1f);
                 position.y += Position.Lane == BattleLane.Foreground
                     ? onTableVisualOffsetY : backgroundTableVisualOffsetY;
+            }
+            else if (Position.Lane == BattleLane.Foreground)
+            {
+                position.y += foregroundStandingVisualOffsetY;
             }
 
             transform.position = position;
@@ -266,36 +284,10 @@ namespace Spotlight.Battle
             {
                 ApplyArtworkSprite();
                 spriteRenderer.flipX = !facingRight;
-                if (spriteRenderer.transform != transform)
-                {
-                    float perspectiveScale = Position.Lane switch
-                    {
-                        BattleLane.Foreground => 1.1f,
-                        BattleLane.Background => 0.9f,
-                        _ => 1f
-                    };
-                    spriteRenderer.transform.localScale = artworkBaseScale * perspectiveScale;
-                    Vector3 artworkPosition = spriteRenderer.transform.localPosition;
-                    float laneDrop = Position.Lane switch
-                    {
-                        BattleLane.Foreground => ForegroundArtworkDropY,
-                        BattleLane.Background => BackgroundArtworkDropY,
-                        _ => 0f
-                    };
-                    artworkPosition.y = ArtworkGroundOffsetY - laneDrop +
-                        ArtworkFootOffsetY * (perspectiveScale - 1f);
-                    // The two new source canvases have different transparent margins.
-                    if (castingRemaining > 0f && castingArtwork != null)
-                        artworkPosition.y -= 0.325f * perspectiveScale;
-                    else if (idleArtwork != null)
-                        artworkPosition.y += 0.025f * perspectiveScale;
-                    artworkPosition.x = (castingRemaining > 0f && castingArtwork != null
-                        ? 0.08f : idleArtwork != null ? 0.28f : 0f) * perspectiveScale;
-                    spriteRenderer.transform.localPosition = artworkPosition;
-                }
                 spriteRenderer.sortingOrder = Posture == PlayerPosture.Prone
                     ? standingSortingOrder - 5
-                    : standingSortingOrder;
+                    : Position.Lane == BattleLane.Foreground && Posture == PlayerPosture.OnTable
+                        ? 25 : standingSortingOrder;
             }
         }
 
@@ -309,22 +301,33 @@ namespace Spotlight.Battle
         private void ApplyArtworkSprite()
         {
             if (spriteRenderer == null) return;
-            Sprite next = castingRemaining > 0f && castingArtwork != null
-                ? castingArtwork : idleArtwork;
+            bool casting = Posture == PlayerPosture.Standing &&
+                castingRemaining > 0f && castingArtwork != null;
+            bool walking = Posture == PlayerPosture.Standing && !casting &&
+                walkRemaining > 0f && walkingArtwork != null && walkingArtwork.Length > 0;
+            Sprite next = Posture == PlayerPosture.Prone && proneArtwork != null ? proneArtwork :
+                Posture == PlayerPosture.OnTable && onTableArtwork != null ? onTableArtwork :
+                casting ? castingArtwork : walking ? walkingArtwork[Mathf.Min(
+                    walkingArtwork.Length - 1,
+                    Mathf.FloorToInt((1f - walkRemaining / WalkDuration) * walkingArtwork.Length))] :
+                idleArtwork;
             if (next != null) spriteRenderer.sprite = next;
-            // Reposition the artwork when the casting timer expires as well.
             if (spriteRenderer.transform != transform && arena != null && IsBattleActive)
             {
                 float perspectiveScale = Position.Lane == BattleLane.Foreground ? 1.1f :
                     Position.Lane == BattleLane.Background ? 0.9f : 1f;
+                spriteRenderer.transform.localScale = artworkBaseScale * perspectiveScale;
                 Vector3 position = spriteRenderer.transform.localPosition;
                 float laneDrop = Position.Lane == BattleLane.Foreground ? ForegroundArtworkDropY :
                     Position.Lane == BattleLane.Background ? BackgroundArtworkDropY : 0f;
                 position.y = ArtworkGroundOffsetY - laneDrop +
                     ArtworkFootOffsetY * (perspectiveScale - 1f) +
-                    (castingRemaining > 0f && castingArtwork != null ? -0.325f : 0.025f) * perspectiveScale;
-                position.x = (castingRemaining > 0f && castingArtwork != null
-                    ? 0.08f : idleArtwork != null ? 0.28f : 0f) * perspectiveScale;
+                    (Posture == PlayerPosture.Prone ? ProneArtworkOffsetY :
+                    Posture == PlayerPosture.OnTable ? OnTableArtworkOffsetY :
+                    casting ? -0.325f : walking ? 0f : 0.025f) * perspectiveScale;
+                position.x = (casting ? 0.08f : walking ? -0.1f :
+                    Posture == PlayerPosture.Prone ? -0.1f :
+                    Posture == PlayerPosture.OnTable ? 0f : 0.28f) * perspectiveScale;
                 spriteRenderer.transform.localPosition = position;
             }
         }

@@ -28,6 +28,7 @@ namespace Spotlight.Battle
 
         public bool IsBattleActive { get; private set; }
         public bool IsLoadoutSelectionOpen { get; private set; }
+        public bool IsRetryPromptOpen { get; private set; }
         public BattleResult LastResult { get; private set; }
         public bool HasPendingWeaponDiscard => LastResult.RequiresWeaponDiscard;
         public System.Collections.Generic.IReadOnlyList<CoverController> Covers => covers ?? Array.Empty<CoverController>();
@@ -105,6 +106,7 @@ namespace Spotlight.Battle
             boss.BeginBattle();
             weapons?.BeginBattle();
             LastResult = default;
+            IsRetryPromptOpen = false;
             IsBattleActive = true;
             BattleHitFeedback feedback = GetComponent<BattleHitFeedback>();
             if (feedback == null) feedback = gameObject.AddComponent<BattleHitFeedback>();
@@ -122,7 +124,7 @@ namespace Spotlight.Battle
 
         public bool TryStartOrRestart()
         {
-            if (IsBattleActive || IsLoadoutSelectionOpen) return false;
+            if (IsBattleActive || IsLoadoutSelectionOpen || IsRetryPromptOpen) return false;
             if (gameplayCoordinator == null) return false;
 
             if (LastResult.RequiresWeaponDiscard)
@@ -154,6 +156,16 @@ namespace Spotlight.Battle
             if (TryStartOrRestart()) return true;
             IsLoadoutSelectionOpen = true;
             return false;
+        }
+
+        public bool TryConfirmRetry()
+        {
+            if (!fightSceneLoadout || !IsRetryPromptOpen || IsBattleActive ||
+                gameplayCoordinator.CurrentPhase != GameplayPhase.PlayerDead) return false;
+            IsRetryPromptOpen = false;
+            weapons?.PrepareSelection();
+            IsLoadoutSelectionOpen = true;
+            return true;
         }
 
         public bool ResolveWeaponDiscard(int slot)
@@ -325,8 +337,16 @@ namespace Spotlight.Battle
             BattleFinished?.Invoke(LastResult);
             if (fightSceneLoadout)
             {
-                weapons?.PrepareSelection();
-                IsLoadoutSelectionOpen = true;
+                if (outcome == BattleOutcome.PlayerDead)
+                {
+                    IsLoadoutSelectionOpen = false;
+                    IsRetryPromptOpen = true;
+                }
+                else
+                {
+                    weapons?.PrepareSelection();
+                    IsLoadoutSelectionOpen = true;
+                }
             }
         }
     }
