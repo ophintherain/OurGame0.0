@@ -47,15 +47,15 @@ namespace Spotlight.Exploration
         private SpriteRenderer placeholderVisual;
 
         [SerializeField]
-        [Tooltip("站立 / 上桌移动时循环播放的序列帧，按数组顺序播放；留空则保持原有静态立绘")]
+        [Tooltip("站立 / 上桌移动时循环播放的序列帧，按数组顺序播放；留空则移动时保持原有静态立绘")]
         private Sprite[] standingMoveFrames;
 
         [SerializeField]
-        [Tooltip("匍匐移动时循环播放的序列帧，按数组顺序播放；留空则保持原有静态立绘")]
+        [Tooltip("匍匐移动时循环播放的序列帧，按数组顺序播放；留空则移动时保持原有静态立绘")]
         private Sprite[] proneMoveFrames;
 
         [SerializeField, Min(1f)]
-        [Tooltip("移动动画播放速度（帧/秒），数值越大动画越快；8 约为正常步频")]
+        [Tooltip("移动动画播放速度（帧/秒），数值越大动画越快；8 约为正常步频。静止时不播放")]
         private float moveFramesPerSecond = 8f;
 
         [SerializeField]
@@ -379,7 +379,7 @@ namespace Spotlight.Exploration
             }
         }
 
-        /// <summary>停下来时显示当前姿势序列帧的第 1 帧；没有序列帧则还原原始立绘。</summary>
+        /// <summary>停下来时：站立显示静态立绘；匍匐显示序列帧第 1 帧，没配则原始立绘。</summary>
         private void ApplyIdleFrame()
         {
             frameIndex = 0;
@@ -392,13 +392,18 @@ namespace Spotlight.Exploration
                 return;
             }
 
-            Sprite[] frames = isProne ? proneMoveFrames : standingMoveFrames;
-            renderer.sprite = frames != null && frames.Length > 0 && frames[0] != null
-                ? frames[0]
-                : (isProne ? proneOriginalSprite : standingOriginalSprite);
+            if (!isProne)
+            {
+                renderer.sprite = standingOriginalSprite;
+                return;
+            }
+
+            renderer.sprite = proneMoveFrames != null && proneMoveFrames.Length > 0 && proneMoveFrames[0] != null
+                ? proneMoveFrames[0]
+                : proneOriginalSprite;
         }
 
-        /// <summary>移动中按帧率循环推进序列帧。</summary>
+        /// <summary>移动中按帧率循环推进当前姿势的序列帧。</summary>
         private void AdvanceMoveAnimation(float deltaTime)
         {
             Sprite[] frames = Posture == ExplorationPosture.Prone ? proneMoveFrames : standingMoveFrames;

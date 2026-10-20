@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0af69acfc385da547badaeb6068c8d20, type: 3}
+  m_Name: StoryAudioSet
+  m_EditorClassIdentifier: 
+  entries:
+  - key: "\u7535\u8BDD\u6742\u97F3"
+    clips:
+    - clip: {fileID: 8300000, guid: 9b6c448975a64004aaccb95c750c86b0, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 1
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u7535\u6D41\u566A\u97F3"
+    clips:
+    - clip: {fileID: 8300000, guid: 7681996eea59d724d9e492bc0cfa916c, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u8B66\u7B1B\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: a9e98774dc4caa446b8c37ddef2b9686, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u8F70\u9E23\u66B4\u96E8"
+    clips:
+    - clip: {fileID: 8300000, guid: 6d340cd4d028da449897a44d941c6ba1, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u96E8\u58F0\u51CF\u5F31"
+    clips:
+    - clip: {fileID: 8300000, guid: 85992c74c1a815a4dabfe7be44ba704b, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: 0
+    fadeOut: -1
+  - key: "\u98CE\u66B4\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: 6d340cd4d028da449897a44d941c6ba1, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u4E4C\u9E26\u53EB\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: d090bb3a83560e848adf2a00195acdb7, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u5217\u8F66\u9E23\u7B1B\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: 711c1e66f44a3554ca14331757a5d1b3, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: 1
+  - key: "\u9E23\u7B1B\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: 711c1e66f44a3554ca14331757a5d1b3, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u9E23\u7B1B\u58F0\u6E10\u5F31"
+    clips: []
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u53D7\u51FB\u6263\u8840\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: 3a3435a2ef73fb34a971ebabe4b1b702, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 0
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u6EF4\u6C34\u58F0"
+    clips:
+    - clip: {fileID: 8300000, guid: adbb09a859fe0ad48abf635c7900e793, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 1
+    fadeIn: -1
+    fadeOut: -1
+  - key: "\u6EF4\u6C34\u58F0-\u95F4\u65AD"
+    clips:
+    - clip: {fileID: 8300000, guid: 84d2e5d8677638444b3d79d9cbcfdb48, type: 3}
+      volume: 1
+    volume: 1
+    isAmbient: 1
+    fadeIn: -1
+    fadeOut: -1
+  stopAmbientKey: "\u505C\u6B62"

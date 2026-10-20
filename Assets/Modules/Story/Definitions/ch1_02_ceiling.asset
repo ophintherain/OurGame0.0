@@ -22,7 +22,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u201D\u8BF7\u6CE8\u89C6\u7740\u6211\uFF0C\u6BCD\u4EB2\u3002\u201C"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\uFF1F\uFF1F"
     audioCue: 
     stageNote: "\u6587\u672C\u6846\u653E\u4E0A\u65B9\uFF0C\u5C45\u4E2D\uFF0C\u5F53\u5F15\u5BFC\u8BED/\u89C4\u5219\u602A\u8C08\u7528\uFF1B\n\u8499\u8138\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71\u4EBA\uFF0C\u5F15\u5BFC\u8BED\u3002"
     sceneTag: 1001
@@ -76,7 +76,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u5988\u5988......\u4F60\u629B\u5F03\u4E86\u6211\u2026\u2026"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\uFF1F\uFF1F"
     audioCue: "\u53D7\u51FB\u6263\u8840\u58F0"
     stageNote: "\u7EA2\u8272\u7279\u6548\u6846\u53D7\u51FB\uFF0C\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71"
     sceneTag: 1001

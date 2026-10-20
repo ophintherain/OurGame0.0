@@ -22,7 +22,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u518D\u6B21\u7AD9\u5728\u4E8B\u6545\u53D1\u751F\u7684\u5217\u8F66\u524D\uFF0C\u662F\u4EC0\u4E48\u6837\u7684\u611F\u89C9\uFF1F"
     choices: []
-    portraitKey: researcher
+    portraitKey: "\u9ED1\u7814\u7A76\u5458\uFF1B\u9ED1\u9E1F"
     audioCue: 
     stageNote: "\u8499\u4F4F\u8138\u7684\u7814\u7A76\u5458\u7ACB\u7ED8\uFF083\u53F7\u602A\uFF09\uFF0C\u906E\u4F4F\u8138\u7684\u7070\u5F71\u4EBA\uFF0C\u5217\u8F66\u6708\u53F0\uFF0C"
     sceneTag: "\u6708\u53F0"
@@ -31,7 +31,7 @@ MonoBehaviour:
     speaker: "\u73A9\u5BB6"
     text: "\u2026..."
     choices: []
-    portraitKey: player
+    portraitKey: "\u73A9\u5BB6"
     audioCue: 
     stageNote: "\u4E3B\u89D2\u7ACB\u7ED8\uFF0C"
     sceneTag: "\u6708\u53F0"
@@ -41,7 +41,7 @@ MonoBehaviour:
     text: "\u8FD9\u901A\u7535\u8BDD\uFF0C\u662F\u606D\u559C\u4F60\u8C03\u67E5\u5458001#master
       name#\uFF0C\u4F60\u6240\u9012\u5448\u7684\u51C0\u5316\u63D0\u6848\uFF0C\u5728\u521A\u521A\u4EE5\u4E00\u7968\u7684\u5FAE\u5F31\u4F18\u52BF\u901A\u8FC7\u4E86\u5BA1\u6838\u3002"
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: "\u7535\u8BDD\u6742\u97F3"
     stageNote: "\u5934\u50CF\uFF0C\u65E0\u9700\u5177\u4F53\u7684\u8138\uFF0C\u8DEF\u4EBAnpc"
     sceneTag: "\u6708\u53F0"
@@ -50,7 +50,7 @@ MonoBehaviour:
     speaker: "\u72C4\u65AF"
     text: "\u8FD9\u610F\u5473\u7740\u4F60\u53EF\u4EE5\u524D\u5F80\u6C61\u67D3\u7684\u4E2D\u5FC3\u6F6E\u6C50\u5217\u8F66\uFF0C\u5F00\u5C55\u51C0\u5316\u3002\u4EE5\u4E0B\u662F\u6F6E\u6C50\u5217\u8F66\u7684\u4E00\u4E9B\u6CE8\u610F\u4E8B\u9879\uFF0C\u4E00\uFF0C\u6F6E\u6C50\u5217\u8F66\u662F\u4E00\u8F86\u6C38\u4E0D\u505C\u6B47\u7684\u6C61\u67D3\u5217\u8F66\u2026\u2026\u51FA\u73B0\u602A\u5F02\u2026\u2026\u6682\u65E0\u65B9\u6CD5\u6E05\u9664\u2026\u2026\u4E8B\u6545......\u9769\u804C\u2026\u2026\u627E\u5230\u602A\u5F02\u2026\u2026\u6D88\u706D\u2026\u2026\u9075\u5B88\u89C4\u5219......"
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: "\u7535\u8BDD\u6742\u97F3"
     stageNote: 
     sceneTag: "\u6708\u53F0"
@@ -68,7 +68,7 @@ MonoBehaviour:
     speaker: "\u72C4\u65AF"
     text: "\u603B\u4E4B\uFF0C\u671F\u5F85\u60A8\u6234\u7F6A\u7ACB\u529F\u7684\u673A\u4F1A\u3002"
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: "\u7535\u8BDD\u6742\u97F3"
     stageNote: 
     sceneTag: 1001
@@ -86,7 +86,7 @@ MonoBehaviour:
     speaker: "\u72C4\u65AF"
     text: "\u9A7E\u9A76\u5458\u5C06\u4F1A\u5728\u534A\u5C0F\u65F6\u540E\uFF0C\u5C06\u4F60\u9001\u5F80\u6C61\u67D3\u4E2D\u5FC3\uFF0C\u8BF7\u505A\u597D\u2026..."
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: "\u7535\u8BDD\u6742\u97F3"
     stageNote: 
     sceneTag: 1001
@@ -95,7 +95,7 @@ MonoBehaviour:
     speaker: "\u72C4\u65AF"
     text: "\u4EC0\u4E48\u58F0\u97F3\uFF1F"
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: "\u5217\u8F66\u9E23\u7B1B\u58F0"
     stageNote: 
     sceneTag: 1001
@@ -113,7 +113,7 @@ MonoBehaviour:
     speaker: "\u72C4\u65AF"
     text: "\u5582\uFF0C\u5582\uFF01\u5582\u2014\u2014"
     choices: []
-    portraitKey: "\u72C4\u65AF"
+    portraitKey: "\u8DEF\u4EBA"
     audioCue: 
     stageNote: 
     sceneTag: 1001

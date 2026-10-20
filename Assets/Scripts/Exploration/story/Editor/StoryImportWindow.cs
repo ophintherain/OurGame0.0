@@ -146,6 +146,7 @@ namespace Spotlight.Exploration.StoryEditor
             int typeColumn = FindColumn(columns, "对象");
             int textColumn = FindColumn(columns, "内容");
             int stageColumn = FindColumn(columns, "演出备注");
+            int portraitColumn = FindColumn(columns, "立绘");
             int audioColumn = FindColumn(columns, "音效");
             int sceneColumn = FindColumn(columns, "场景");
             int noteColumn = FindColumn(columns, "需求备注");
@@ -183,6 +184,7 @@ namespace Spotlight.Exploration.StoryEditor
                 string type = Get(row, typeColumn);
                 string text = Get(row, textColumn);
                 string stage = Get(row, stageColumn);
+                string portrait = Get(row, portraitColumn);
                 string audio = Get(row, audioColumn);
                 string scene = Get(row, sceneColumn);
                 string note = Get(row, noteColumn);
@@ -243,7 +245,7 @@ namespace Spotlight.Exploration.StoryEditor
                     choices = kind == StoryLineKind.Choice
                         ? new[] { text }
                         : Array.Empty<string>(),
-                    portraitKey = InferPortraitKey(stage, type, kind),
+                    portraitKey = ResolvePortraitKey(portrait, stage, type, kind),
                     audioCue = audio,
                     stageNote = stage,
                     sceneTag = scene,
@@ -475,6 +477,34 @@ namespace Spotlight.Exploration.StoryEditor
             }
 
             return StoryLineKind.Dialogue;
+        }
+
+        /// <summary>
+        /// 优先使用「立绘」列的值作为 key，让同一角色在改名前后共用同一张立绘；
+        /// 该列为空时直接用「对象」列的名字，最后才回退到舞台推断。
+        /// </summary>
+        private static string ResolvePortraitKey(
+            string portrait,
+            string stage,
+            string speaker,
+            StoryLineKind kind)
+        {
+            if (kind != StoryLineKind.Dialogue)
+            {
+                return string.Empty;
+            }
+
+            if (!string.IsNullOrWhiteSpace(portrait))
+            {
+                return portrait.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(speaker))
+            {
+                return speaker.Trim();
+            }
+
+            return InferPortraitKey(stage, speaker, kind);
         }
 
         private static string InferPortraitKey(string stage, string speaker, StoryLineKind kind)

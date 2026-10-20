@@ -51,8 +51,12 @@ namespace Spotlight.Exploration
         private TMP_Text topHintText;
 
         [SerializeField]
-        [Tooltip("立绘图片。留空则不显示立绘")]
+        [Tooltip("立绘图片。留空则不显示立绘。多个立绘同时出现时会以这个节点为模板和基准位置，自动向右复制")]
         private Image portraitImage;
+
+        [SerializeField, Range(0f, 2f)]
+        [Tooltip("多个立绘同时出现时，相邻立绘的水平间距（相对单张立绘宽度的比例）。1 = 刚好并排，0.6 = 部分重叠；只有 1 张立绘时不起作用")]
+        private float portraitSpacing = 0.85f;
 
         [SerializeField]
         [Tooltip("「点击继续」提示物体。留空则不显示提示")]
@@ -71,6 +75,9 @@ namespace Spotlight.Exploration
         private Color warningColor = new Color(1f, 0.35f, 0.35f, 1f);
 
         private readonly List<GameObject> choiceInstances = new List<GameObject>();
+        private readonly List<Image> portraitSlots = new List<Image>();
+        private Vector2 portraitBasePosition;
+        private bool portraitLayerReady;
         private string playerDisplayName = string.Empty;
         private string censorReplacement = string.Empty;
         private int shownFrame = -1;
@@ -108,6 +115,12 @@ namespace Spotlight.Exploration
                 choiceButtonTemplate.gameObject.SetActive(false);
             }
 
+            if (portraitImage != null)
+            {
+                portraitSlots.Add(portraitImage);
+                portraitBasePosition = portraitImage.rectTransform.anchoredPosition;
+            }
+
             panelRoot.SetActive(false);
         }
 
@@ -118,8 +131,8 @@ namespace Spotlight.Exploration
             censorReplacement = censor ?? string.Empty;
         }
 
-        /// <summary>显示一行剧情。portrait 为 null 时隐藏立绘。</summary>
-        public void ShowLine(StoryLine line, Sprite portrait)
+        /// <summary>显示一行剧情。portraits 为空或全部为 null 时隐藏立绘。</summary>
+        public void ShowLine(StoryLine line, Sprite[] portraits)
         {
             if (line == null || panelRoot == null)
             {
@@ -175,7 +188,7 @@ namespace Spotlight.Exploration
                     }
 
                     SetText(bodyText, line.text);
-                    ShowPortrait(portrait);
+                    ShowPortraits(portraits);
                     break;
             }
         }
@@ -290,26 +303,140 @@ namespace Spotlight.Exploration
             return result;
         }
 
-        private void ShowPortrait(Sprite portrait)
+        /// <summary>
+        /// 显示一行里的所有立绘。以 portraitImage 为模板按需克隆槽位，
+        /// 多张时以原始位置为中心横向排开，间距由 portraitSpacing 控制。
+        /// </summary>
+        private void ShowPortraits(Sprite[] portraits)
         {
             if (portraitImage == null)
             {
                 return;
             }
 
-            portraitImage.sprite = portrait;
-            portraitImage.enabled = portrait != null;
+            EnsurePortraitLayer();
+
+            List<Sprite> visible = new List<Sprite>();
+            if (portraits != null)
+            {
+                for (int index = 0; index < portraits.Length; index++)
+                {
+                    if (portraits[index] != null)
+                    {
+                        visible.Add(portraits[index]);
+                    }
+                }
+            }
+
+            EnsurePortraitSlots(visible.Count);
+
+            for (int index = 0; index < portraitSlots.Count; index++)
+            {
+                bool show = index < visible.Count;
+                Image slot = portraitSlots[index];
+                slot.sprite = show ? visible[index] : null;
+                slot.enabled = show;
+                slot.gameObject.SetActive(show);
+            }
+
+            float spacing = portraitImage.rectTransform.rect.width * portraitSpacing;
+            float center = (visible.Count - 1) * 0.5f;
+
+            for (int index = 0; index < visible.Count; index++)
+            {
+                portraitSlots[index].rectTransform.anchoredPosition =
+                    portraitBasePosition + new Vector2((index - center) * spacing, 0f);
+            }
+        }
+
+        private void EnsurePortraitSlots(int count)
+        {
+            if (portraitImage == null)
+            {
+                return;
+            }
+
+            if (portraitSlots.Count == 0)
+            {
+                portraitSlots.Add(portraitImage);
+                portraitBasePosition = portraitImage.rectTransform.anchoredPosition;
+            }
+
+            while (portraitSlots.Count < count)
+            {
+                Image clone = Instantiate(portraitImage, portraitImage.transform.parent);
+                clone.name = $"PortraitSlot{portraitSlots.Count}";
+                clone.sprite = null;
+                clone.enabled = false;
+                clone.raycastTarget = false;
+
+                if (dialogueRoot != null && clone.transform.parent == dialogueRoot.transform.parent)
+                {
+                    clone.transform.SetSiblingIndex(dialogueRoot.transform.GetSiblingIndex());
+                }
+
+                portraitSlots.Add(clone);
+            }
+        }
+
+        /// <summary>
+        /// 第一次显示立绘时再调整层级：此时 Canvas 布局已完成，换父节点不会把位置算偏。
+        /// </summary>
+        private void EnsurePortraitLayer()
+        {
+            if (portraitLayerReady)
+            {
+                return;
+            }
+
+            portraitLayerReady = true;
+            MovePortraitBehindDialogue();
+
+            if (portraitImage != null)
+            {
+                portraitBasePosition = portraitImage.rectTransform.anchoredPosition;
+            }
+        }
+
+        /// <summary>
+        /// 把立绘挂到对话框的同一父级，并排在对话框前面，使立绘位于对话框面板之下、不再遮挡它。
+        /// SetParent 保持世界位置，所以 Inspector 里调好的位置不会变。
+        /// </summary>
+        private void MovePortraitBehindDialogue()
+        {
+            if (portraitImage == null || dialogueRoot == null)
+            {
+                return;
+            }
+
+            Transform parent = dialogueRoot.transform.parent;
+            if (parent == null)
+            {
+                return;
+            }
+
+            if (portraitImage.transform.parent != parent)
+            {
+                portraitImage.transform.SetParent(parent, true);
+            }
+
+            portraitImage.transform.SetSiblingIndex(dialogueRoot.transform.GetSiblingIndex());
         }
 
         private void HidePortrait()
         {
-            if (portraitImage == null)
+            for (int index = 0; index < portraitSlots.Count; index++)
             {
-                return;
-            }
+                Image slot = portraitSlots[index];
+                if (slot == null)
+                {
+                    continue;
+                }
 
-            portraitImage.sprite = null;
-            portraitImage.enabled = false;
+                slot.sprite = null;
+                slot.enabled = false;
+                slot.gameObject.SetActive(false);
+            }
         }
 
         private static void SetActive(GameObject target, bool active)

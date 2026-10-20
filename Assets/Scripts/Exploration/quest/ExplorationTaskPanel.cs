@@ -59,6 +59,22 @@ namespace Spotlight.Exploration
         [Tooltip("第二行相对第一行向下偏移的 UI 距离（面板单位），默认 64")]
         private float rowSpacing = 64f;
 
+        [SerializeField]
+        [Tooltip("打开任务栏时播放的音效。直接把音频文件拖进来；留空则不播")]
+        private AudioClip openSound;
+
+        [SerializeField]
+        [Tooltip("关闭任务栏时播放的音效。直接把音频文件拖进来；留空则不播")]
+        private AudioClip closeSound;
+
+        [SerializeField, Range(0f, 1f)]
+        [Tooltip("任务栏开关音效的音量 0~1。0 = 静音，1 = 原始音量")]
+        private float soundVolume = 1f;
+
+        [SerializeField]
+        [Tooltip("播放任务栏开关音效的 AudioSource。留空会自动取同一个物体上的组件，没有则自动添加；一般不需要手动拖")]
+        private AudioSource soundSource;
+
         /// <summary>任务完成事件：0 = 收集武器，1 = 观测怪异。</summary>
         public event Action<int> TaskCompleted;
 
@@ -101,6 +117,18 @@ namespace Spotlight.Exploration
                 buttonImage = btnOpen.GetComponent<Image>();
                 defaultButtonIcon = buttonImage != null ? buttonImage.sprite : null;
             }
+
+            if (soundSource == null)
+            {
+                soundSource = GetComponent<AudioSource>();
+                if (soundSource == null)
+                {
+                    soundSource = gameObject.AddComponent<AudioSource>();
+                }
+            }
+
+            soundSource.playOnAwake = false;
+            soundSource.spatialBlend = 0f;
 
             CreateSecondRow();
 
@@ -161,8 +189,14 @@ namespace Spotlight.Exploration
                 backpackPanel.SetOpen(false);
             }
 
+            bool stateChanged = panelRoot.activeSelf != open;
             panelRoot.SetActive(open);
             UpdateButtonIcon(open);
+
+            if (stateChanged)
+            {
+                PlayToggleSound(open);
+            }
 
             if (player != null)
             {
@@ -173,6 +207,18 @@ namespace Spotlight.Exploration
             {
                 RefreshTasks();
             }
+        }
+
+        /// <summary>播放打开 / 关闭任务栏音效；没有配置对应音频时静默。</summary>
+        private void PlayToggleSound(bool open)
+        {
+            AudioClip clip = open ? openSound : closeSound;
+            if (clip == null || soundSource == null)
+            {
+                return;
+            }
+
+            soundSource.PlayOneShot(clip, Mathf.Clamp01(soundVolume));
         }
 
         /// <summary>后续剧情 / 交互系统调用，完成「观测怪异」任务。</summary>
@@ -258,6 +304,7 @@ namespace Spotlight.Exploration
             {
                 panelRoot.SetActive(false);
                 UpdateButtonIcon(false);
+                PlayToggleSound(false);
             }
         }
 

@@ -19,6 +19,15 @@ MonoBehaviour:
   completeObserveTaskOnFinish: 0
   lines:
   - kind: 0
+    speaker: "\u7F3A\u773C\u73A9\u5076"
+    text: "\u5931\u53BB\u773C\u775B\u7684\u4E4C\u9E26\u73A9\u5076\n\u7834\u65E7\u7684\u73A9\u5076\u5931\u53BB\u4E86\u5B83\u539F\u6709\u7684\u9B45\u529B\uFF0C\u672C\u8BE5\u9576\u5D4C\u773C\u775B\u7684\u5730\u65B9\uFF0C\u88AB\u4EBA\u4E3A\u6316\u51FA\u3002\u672C\u5C31\u662F\u8FC7\u65F6\u7684\u6B3E\u5F0F\uFF0C\u5982\u4ECA\u5931\u53BB\u773C\u775B\u7684\u73A9\u5076\u66F4\u662F\u65E0\u4EBA\u95EE\u6D25\u3002\u5C3E\u7FBD\u6807\u7B7E\u5904\u6709\u4E00\u53E5\u6781\u77ED\u7684\u795D\u798F\u201C\u5C0F\u7FBD\uFF0C\u751F\u65E5\u5FEB\u4E50\u3002\u201D"
+    choices: []
+    portraitKey: "\u7F3A\u773C\u73A9\u5076"
+    audioCue: 
+    stageNote: 
+    sceneTag: 1001
+    note: 
+  - kind: 0
     speaker: "\uFF1F\uFF1F"
     text: "\u8C01\u5141\u8BB8\u4F60\u62FF\u8D77\u8FD9\u4E2A\u4E1C\u897F\u3002"
     choices: []
@@ -96,7 +105,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u6211\u731C\u5BF9\u4E86\uFF0C\u5BF9\u5417\u2026...\u961F\u957F\u3002"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\u9ED1\u9E1F"
     audioCue: 
     stageNote: "\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71"
     sceneTag: 1001
@@ -123,7 +132,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u201C\u961F\u957F\uFF0C\u6709\u6211\u5728\uFF0C\u4F60\u6709\u4EC0\u4E48\u653E\u5FC3\u4E0D\u4E0B\u7684\uFF1F\u201D"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\u9ED1\u9E1F"
     audioCue: 
     stageNote: "\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71\uFF0C\u56DE\u5FC6\u6EE4\u955C"
     sceneTag: 1001
@@ -132,7 +141,7 @@ MonoBehaviour:
     speaker: "\uFF1F\uFF1F"
     text: "\u201C**\u6587\u660E\u7528\u8BED**\uFF0C\u4F60\u4E0D\u4F1A\u662F\u4E0D\u76F8\u4FE1\u6211\u5427\uFF1F\u201D"
     choices: []
-    portraitKey: firefeather
+    portraitKey: "\u9ED1\u9E1F"
     audioCue: 
     stageNote: "\u8499\u4F4F\u8138\u7684\u9E1F\u5934\u4EBA\uFF0C\u7070\u5F71\uFF0C\u56DE\u5FC6\u6EE4\u955C"
     sceneTag: 1001
